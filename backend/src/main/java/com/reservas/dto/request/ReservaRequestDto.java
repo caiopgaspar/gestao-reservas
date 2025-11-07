@@ -1,7 +1,5 @@
 package com.reservas.dto.request;
 
-import com.reservas.model.Recurso;
-import com.reservas.model.Usuario;
 import com.reservas.model.enums.StatusReservaEnum;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -37,9 +35,9 @@ public class ReservaRequestDto {
     private StatusReservaEnum status;
 
     @NotBlank(message = "O Recurso é obrigatório.")
-    private Recurso recurso;
+    private Long recursoId;
 
     @NotBlank(message = "O usuário é obrigatório.")
-    private Usuario usuario;
+    private Long usuarioId;
 
 }
