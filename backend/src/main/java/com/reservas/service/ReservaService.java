@@ -38,6 +38,17 @@ public class ReservaService implements IReservaService{
     }
 
     @Override
+    public List<Reserva> buscarReservaPorUsuario(Long usuarioId) {
+        return reservaRepository.findByUsuarioIdOrderByDataHoraInicioAsc(usuarioId);
+    }
+
+    @Override
+    public List<Reserva> buscarReservasPorRecurso(Long recursoId) {
+        // Usa o Repository para buscar todas as reservas daquele recurso.
+        return reservaRepository.findByRecursoIdOrderByDataHoraInicioAsc(recursoId);
+    }
+
+    @Override
     public List<Reserva> verificarConflito(Long recursoId, LocalDateTime inicio, LocalDateTime fim, Long idReservaAtual) {
         return reservaRepository.findReservasConflitantes(
                 recursoId,
@@ -86,6 +97,7 @@ public class ReservaService implements IReservaService{
 
     @Override
     public void deletar(Long id) {
-
+        Reserva reserva = buscarPorId(id);
+        reservaRepository.delete(reserva);
     }
 }

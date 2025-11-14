@@ -1,6 +1,7 @@
 package com.reservas.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,7 +26,7 @@ public class RecursoRequestDto {
 
     private Integer capacidade;
 
-    @NotBlank(message = "O tipo de recurso é obrigatório.")
+    @NotNull(message = "O tipo de recurso é obrigatório.")
     private Long tipoRecursoId;
 
 }

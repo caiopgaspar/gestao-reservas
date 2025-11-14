@@ -15,7 +15,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     @Query("SELECT r FROM Reserva r " +
             "WHERE r.recurso.id = :recursoId " +
             "AND r.status IN ('APROVADA', 'PENDENTE') " +
-            "AND :inicio < r.dataHoraFim AND :fim > r.dataHoraInicio" +
+            "AND (:inicio < r.dataHoraFim AND :fim > r.dataHoraInicio)" +
             "AND (:idReservaAtual IS NULL OR r.id != :idReservaAtual)"
     )
     List<Reserva> findReservasConflitantes(
@@ -27,11 +27,12 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
 
     List<Reserva> findByUsuarioIdOrderByDataHoraInicioAsc(Long usuarioId);
 
+    List<Reserva> findByRecursoIdOrderByDataHoraInicioAsc(Long recursoId);
+
     List<Reserva> findByRecursoIdAndDataHoraFimAfterAndDataHoraInicioBefore(
             Long recursoId,
             LocalDateTime periodoInicio,
-            LocalDateTime periodoFim,
-            Long idReservaAtual
+            LocalDateTime periodoFim
     );
 
 }

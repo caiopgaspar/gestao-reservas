@@ -1,5 +1,6 @@
 package com.reservas.service;
 
+import com.reservas.dto.request.UsuarioAuthDto;
 import com.reservas.dto.request.UsuarioRequestDto;
 import com.reservas.model.Usuario;
 
@@ -13,11 +14,17 @@ public interface IUsuarioService {
 
     Usuario buscarPorNomeUsuario (String nomeUsuario);
 
+    List<Usuario> buscarTodos();
+
+    List<Usuario> buscarPorNome(String nomeCompleto);
+
     Usuario buscarPorMatricula (String matricula);
 
     Usuario buscarPorEmail (String email);
 
-    void validarDuplicidade(String matricula, String nomeUsuario);
+    String autenticar(UsuarioAuthDto authDto);
+
+    void validarDuplicidade(String matricula, String nomeUsuario, String email);
 
     void deletar (Long id);
 

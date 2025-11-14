@@ -30,7 +30,7 @@ public class RecursoService implements IRecursoService{
     @Override
     public List<Recurso> buscarPorNome(String nome) {
         if (nome == null || nome.trim().isEmpty()){
-            return List.of();
+            return recursoRepository.findAll();
         }
         return recursoRepository.findByNomeContainingIgnoreCase(nome);
     }
@@ -53,9 +53,17 @@ public class RecursoService implements IRecursoService{
     @Override
     @Transactional
     public Recurso salvar(RecursoRequestDto dto) {
+
         Recurso recursoExistente = buscarPorCodigoIdentificacao(dto.getCodigoIdentificacao());
-        if (recursoExistente != null && (dto.getId() == null) || !dto.getId().equals(recursoExistente.getId())){
-            throw new IllegalArgumentException("Já existe um Recurso cadastrado com o código de identificação " + dto.getCodigoIdentificacao());
+
+        if (recursoExistente != null){
+
+            boolean isNovoRecurso = dto.getId() == null;
+            boolean isOutroRecurso = !recursoExistente.getId().equals(dto.getId());
+
+            if (isNovoRecurso || isOutroRecurso){
+                throw new IllegalArgumentException("Já existe um Recurso cadastrado com o código de identificação " + dto.getCodigoIdentificacao());
+            }
         }
 
         TipoRecurso tipo = tipoRecursoService.buscarPorId(dto.getTipoRecursoId());

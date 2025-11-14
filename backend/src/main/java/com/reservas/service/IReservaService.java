@@ -12,6 +12,10 @@ public interface IReservaService {
 
     List<Reserva> buscarTodas();
 
+    List<Reserva> buscarReservaPorUsuario(Long usuarioId);
+
+    List<Reserva> buscarReservasPorRecurso(Long recursoId);
+
     List<Reserva> verificarConflito(Long recursoId, LocalDateTime inicio, LocalDateTime fim, Long idReservaAtual);
 
     Reserva salvar (ReservaRequestDto dto);

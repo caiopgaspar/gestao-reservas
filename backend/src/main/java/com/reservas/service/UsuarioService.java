@@ -1,5 +1,6 @@
 package com.reservas.service;
 
+import com.reservas.dto.request.UsuarioAuthDto;
 import com.reservas.dto.request.UsuarioRequestDto;
 import com.reservas.model.Usuario;
 import com.reservas.repository.UsuarioRepository;
@@ -34,6 +35,19 @@ public class UsuarioService implements  IUsuarioService{
     }
 
     @Override
+    public List<Usuario> buscarTodos() {
+        return usuarioRepository.findAll();
+    }
+
+    @Override
+    public List<Usuario> buscarPorNome(String nomeCompleto) {
+        if (nomeCompleto == null || nomeCompleto.trim().isEmpty()) {
+            return usuarioRepository.findAll();
+        }
+        return usuarioRepository.findByNomeCompletoContainingIgnoreCase(nomeCompleto);
+    }
+
+    @Override
     public Usuario buscarPorMatricula(String matricula) {
         return usuarioRepository.findByMatricula(matricula)
                 .orElseThrow(() -> new NoSuchElementException("Matrícula não encontrada: " + matricula));
@@ -46,7 +60,20 @@ public class UsuarioService implements  IUsuarioService{
     }
 
     @Override
-    public void validarDuplicidade(String matricula, String nomeUsuario) {
+    public String autenticar(UsuarioAuthDto authDto) {
+
+        Usuario usuario = buscarPorNomeUsuario(authDto.getNomeUsuario());
+
+        if (passwordEncoder.matches(authDto.getSenha(), usuario.getSenha())) {
+            return "Autenticação bem-sucedida. Bem-vindo, " + usuario.getNomeUsuario() + ".";
+
+        } else {
+            throw new IllegalArgumentException("Credenciais inválidas: Senha incorreta.");
+        }
+    }
+
+    @Override
+    public void validarDuplicidade(String matricula, String nomeUsuario, String email) {
 
         if (usuarioRepository.findByMatricula(matricula).isPresent()){
             throw new IllegalArgumentException("Matrícula já cadastrada.");
@@ -55,31 +82,28 @@ public class UsuarioService implements  IUsuarioService{
         if (usuarioRepository.findByNomeUsuario(nomeUsuario).isPresent()){
             throw new IllegalArgumentException("Nome de usuário já em uso");
         }
-
     }
 
     @Override
     @Transactional
     public Usuario salvar(UsuarioRequestDto dto) {
 
-            validarDuplicidade(dto.getMatricula(), dto.getNomeUsuario());
+        validarDuplicidade(dto.getMatricula(), dto.getNomeUsuario(), dto.getEmail());
 
-            Usuario usuario = new Usuario(
-                    dto.getMatricula(),
-                    dto.getNomeCompleto(),
-                    dto.getNomeUsuario(),
-                    dto.getLotacao()
-            );
+        Usuario usuario = dto.getId() != null ? buscarPorId(dto.getId()) : new Usuario();
 
-            if (dto.getId() != null) {
-                usuario.setId(dto.getId());
-            }
+        usuario.setMatricula(dto.getMatricula());
+        usuario.setNomeCompleto(dto.getNomeCompleto());
+        usuario.setNomeUsuario(dto.getNomeUsuario());
+        usuario.setEmail(dto.getEmail());
+        usuario.setLotacao(dto.getLotacao());
 
+        if (dto.getSenha() != null && !dto.getSenha().isEmpty()) {
             String senhaHash = passwordEncoder.encode(dto.getSenha());
             usuario.setSenha(senhaHash);
+        }
 
-            return usuarioRepository.save(usuario);
-
+        return usuarioRepository.save(usuario);
     }
 
     @Override

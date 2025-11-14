@@ -1,5 +1,6 @@
 package com.reservas.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,7 +27,7 @@ public class TipoRecurso {
     @Column(length = 255)
     private String descricao;
 
-
+    @JsonIgnore
     @OneToMany(mappedBy = "tipo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Recurso> recursos;
 

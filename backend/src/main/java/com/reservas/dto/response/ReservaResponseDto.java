@@ -46,7 +46,7 @@ public class ReservaResponseDto {
         if (reserva.getUsuario() != null) {
             this.usuarioId = reserva.getUsuario().getId();
             this.nomeCompleto = reserva.getUsuario().getNomeCompleto();
-            this.nomeUsuario = reserva.getUsuario().getNomeCompleto();
+            this.nomeUsuario = reserva.getUsuario().getNomeUsuario();
             this.matriculaUsuario = reserva.getUsuario().getMatricula();
         }
     }

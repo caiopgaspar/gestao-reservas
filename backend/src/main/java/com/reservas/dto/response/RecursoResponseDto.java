@@ -26,10 +26,8 @@ public class RecursoResponseDto {
         this.codigoIdentificacao = recurso.getCodigoIdentificacao();
         this.localizacao = recurso.getLocalizacao();
         this.capacidade = recurso.getCapacidade();
-        if (recurso.getTipo() != null){
-            this.tipoRecursoId = recurso.getTipo().getId();
-            this.nomeTipoRecurso = recurso.getTipo().getNome();
-        }
+        this.tipoRecursoId = recurso.getTipo().getId();
+        this.nomeTipoRecurso = recurso.getTipo().getNome();
     }
 
 }
