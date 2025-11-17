@@ -1,8 +1,10 @@
 package com.reservas.service;
 
+import com.reservas.exception.ResourceInUseException;
 import com.reservas.model.TipoRecurso;
 import com.reservas.repository.TipoRecursoRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,6 +50,14 @@ public class TipoRecursoService implements ITipoRecursoService{
     @Override
     @Transactional
     public void deletar(Long id) {
-        tipoRecursoRepository.deleteById(id);
+        TipoRecurso tipoRecurso = buscarPorId(id);
+        try {
+            tipoRecursoRepository.deleteById(id);
+            tipoRecursoRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            String nomeTipoRecurso = tipoRecurso.getNome();
+            throw new ResourceInUseException("Não é possível excluir o Tipo de Recurso (" + nomeTipoRecurso + ") pois ele está vinculado a um ou mais Recursos");
+        }
     }
+
 }

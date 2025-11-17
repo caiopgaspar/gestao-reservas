@@ -5,11 +5,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RecursoRepository extends JpaRepository<Recurso, Long> {
 
-    Recurso findByCodigoIdentificacao(String codigoIdentificacao);
+    Optional<Recurso> findByCodigoIdentificacao(String codigoIdentificacao);
 
     List<Recurso> findByNomeContainingIgnoreCase(String nome);
 

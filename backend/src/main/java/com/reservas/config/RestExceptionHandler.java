@@ -1,5 +1,6 @@
 package com.reservas.config;
 
+import com.reservas.exception.ResourceInUseException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -33,5 +34,10 @@ public class RestExceptionHandler {
         });
 
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ResourceInUseException.class)
+    public ResponseEntity<String> handleResourceInUseException(ResourceInUseException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
     }
 }

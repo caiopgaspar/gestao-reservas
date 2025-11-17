@@ -38,7 +38,7 @@ public class Usuario {
     private String lotacao;
 
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
     private List<Reserva> reservas;
 
 

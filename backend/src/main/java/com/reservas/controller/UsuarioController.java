@@ -31,21 +31,24 @@ public class UsuarioController {
     }
 
     @GetMapping("/nome-usuario/{nomeUsuario}")
-    public ResponseEntity<Usuario> buscarPorNomeUsuario(@PathVariable String nomeUsuario){
+    public ResponseEntity<UsuarioResponseDto> buscarPorNomeUsuario(@PathVariable String nomeUsuario){
         Usuario usuario = usuarioService.buscarPorNomeUsuario(nomeUsuario);
-        return ResponseEntity.ok(usuario);
+        UsuarioResponseDto responseDto = new UsuarioResponseDto(usuario);
+        return ResponseEntity.ok(responseDto);
     }
 
     @GetMapping("/matricula/{matricula}")
-    public ResponseEntity<Usuario> buscarPorMatricula(@PathVariable String matricula){
+    public ResponseEntity<UsuarioResponseDto> buscarPorMatricula(@PathVariable String matricula){
         Usuario usuario = usuarioService.buscarPorMatricula(matricula);
-        return ResponseEntity.ok(usuario);
+        UsuarioResponseDto responseDto = new UsuarioResponseDto(usuario);
+        return ResponseEntity.ok(responseDto);
     }
 
     @GetMapping("/email/{email}")
-    public ResponseEntity<Usuario> buscarPorEmail(@PathVariable String email){
+    public ResponseEntity<UsuarioResponseDto> buscarPorEmail(@PathVariable String email){
         Usuario usuario = usuarioService.buscarPorEmail(email);
-        return ResponseEntity.ok(usuario);
+        UsuarioResponseDto responseDto = new UsuarioResponseDto(usuario);
+        return ResponseEntity.ok(responseDto);
     }
 
     @GetMapping
@@ -64,25 +67,24 @@ public class UsuarioController {
                 .map(UsuarioResponseDto::new)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(responseList); // Retorna 200 OK
+        return ResponseEntity.ok(responseList);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> atualizar(
-            @PathVariable Long id,
-            @Valid @RequestBody UsuarioRequestDto dto
+    public ResponseEntity<UsuarioResponseDto> atualizar(@PathVariable Long id,
+                                             @Valid @RequestBody UsuarioRequestDto dto
     ){
         dto.setId(id);
         Usuario usuarioAtualizado = usuarioService.salvar(dto);
         UsuarioResponseDto responseDto = new UsuarioResponseDto(usuarioAtualizado);
-        return ResponseEntity.ok(usuarioAtualizado);
+        return ResponseEntity.ok(responseDto);
     }
 
     @PostMapping("/cadastro")
-    public ResponseEntity<Usuario> cadastrar(@Valid @RequestBody UsuarioRequestDto dto){
+    public ResponseEntity<UsuarioResponseDto> cadastrar(@Valid @RequestBody UsuarioRequestDto dto){
         Usuario novoUsuario = usuarioService.salvar(dto);
         UsuarioResponseDto responseDto = new UsuarioResponseDto(novoUsuario);
-        return new ResponseEntity<>(novoUsuario, HttpStatus.CREATED);
+        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")

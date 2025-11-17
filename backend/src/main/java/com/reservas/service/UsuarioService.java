@@ -2,9 +2,11 @@ package com.reservas.service;
 
 import com.reservas.dto.request.UsuarioAuthDto;
 import com.reservas.dto.request.UsuarioRequestDto;
+import com.reservas.exception.ResourceInUseException;
 import com.reservas.model.Usuario;
 import com.reservas.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -65,7 +67,7 @@ public class UsuarioService implements  IUsuarioService{
         Usuario usuario = buscarPorNomeUsuario(authDto.getNomeUsuario());
 
         if (passwordEncoder.matches(authDto.getSenha(), usuario.getSenha())) {
-            return "Autenticação bem-sucedida. Bem-vindo, " + usuario.getNomeUsuario() + ".";
+            return "Autenticação bem-sucedida. Bem-vindo, " + usuario.getNomeCompleto() + ".";
 
         } else {
             throw new IllegalArgumentException("Credenciais inválidas: Senha incorreta.");
@@ -73,22 +75,29 @@ public class UsuarioService implements  IUsuarioService{
     }
 
     @Override
-    public void validarDuplicidade(String matricula, String nomeUsuario, String email) {
+    public void validarDuplicidade(String matricula, String nomeUsuario, String email, Long idUsuarioAtual) {
 
-        if (usuarioRepository.findByMatricula(matricula).isPresent()){
-            throw new IllegalArgumentException("Matrícula já cadastrada.");
-        }
+        usuarioRepository.findByMatricula(matricula).ifPresent(colisor -> {
 
-        if (usuarioRepository.findByNomeUsuario(nomeUsuario).isPresent()){
-            throw new IllegalArgumentException("Nome de usuário já em uso");
-        }
+            if (idUsuarioAtual == null || !colisor.getId().equals(idUsuarioAtual)) {
+                throw new IllegalArgumentException("Matrícula '" + matricula + "' já cadastrada para outro usuário.");
+            }
+
+        });
+
+        usuarioRepository.findByNomeUsuario(nomeUsuario).ifPresent(colisor -> {
+            if (idUsuarioAtual == null || !colisor.getId().equals(idUsuarioAtual)) {
+                throw new IllegalArgumentException("Nome de usuário '" + nomeUsuario + "' já em uso.");
+            }
+        });
+
     }
 
     @Override
     @Transactional
     public Usuario salvar(UsuarioRequestDto dto) {
 
-        validarDuplicidade(dto.getMatricula(), dto.getNomeUsuario(), dto.getEmail());
+        validarDuplicidade(dto.getMatricula(), dto.getNomeUsuario(), dto.getEmail(), dto.getId());
 
         Usuario usuario = dto.getId() != null ? buscarPorId(dto.getId()) : new Usuario();
 
@@ -108,8 +117,14 @@ public class UsuarioService implements  IUsuarioService{
 
     @Override
     public void deletar(Long id) {
-            Usuario usuario = buscarPorId(id); // Garante que o usuário existe
+        Usuario usuario = buscarPorId(id);
+        try {
             usuarioRepository.delete(usuario);
+            usuarioRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            String nomeUsuario = usuario.getNomeUsuario();
+            throw new ResourceInUseException("Não é possível excluir o Usuário (" + nomeUsuario + ") pois ele possui Reservas registradas.");
+        }
     }
 }
 

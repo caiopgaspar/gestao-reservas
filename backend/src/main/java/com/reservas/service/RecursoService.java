@@ -1,10 +1,12 @@
 package com.reservas.service;
 
+import com.reservas.exception.ResourceInUseException;
 import com.reservas.dto.request.RecursoRequestDto;
 import com.reservas.model.Recurso;
 import com.reservas.model.TipoRecurso;
 import com.reservas.repository.RecursoRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,7 +26,7 @@ public class RecursoService implements IRecursoService{
     @Override
     public Recurso buscarPorId(Long id) {
         return recursoRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Tipo de recurso com ID " + id + " não encontrado."));
+                .orElseThrow(() -> new NoSuchElementException("Recurso com ID " + id + " não encontrado."));
     }
 
     @Override
@@ -37,7 +39,8 @@ public class RecursoService implements IRecursoService{
 
     @Override
     public Recurso buscarPorCodigoIdentificacao(String codigoIdentificacao) {
-        return recursoRepository.findByCodigoIdentificacao(codigoIdentificacao);
+        return recursoRepository.findByCodigoIdentificacao(codigoIdentificacao)
+                .orElse(null);
     }
 
     @Override
@@ -87,6 +90,12 @@ public class RecursoService implements IRecursoService{
     @Transactional
     public void deletar(Long id) {
         Recurso recurso = buscarPorId(id);
-        recursoRepository.delete(recurso);
+        try {
+            recursoRepository.delete(recurso);
+            recursoRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            String nomeRecurso = recurso.getNome();
+            throw new ResourceInUseException("Não é possível excluir o Recurso (" + nomeRecurso + ") pois ele possui Reservas vinculadas.");
+        }
     }
 }

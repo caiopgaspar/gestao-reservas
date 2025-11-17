@@ -23,10 +23,10 @@ public class RecursoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Recurso> buscarPorId(@PathVariable Long id){
+    public ResponseEntity<RecursoResponseDto> buscarPorId(@PathVariable Long id){
         Recurso recurso = recursoService.buscarPorId(id);
         RecursoResponseDto responseDto = new RecursoResponseDto(recurso);
-        return ResponseEntity.ok(recurso);
+        return ResponseEntity.ok(responseDto);
     }
 
     @GetMapping
@@ -51,26 +51,27 @@ public class RecursoController {
         return ResponseEntity.ok(responseList);
     }
 
-    @GetMapping("/codigo/{codigo}")
-    public ResponseEntity<Recurso> buscarPorCodigoIdentificacao(@PathVariable("codigo")String codigoIdentificacao){
+    @GetMapping("/codigo/{codigoIdentificacao}")
+    public ResponseEntity<RecursoResponseDto> buscarPorCodigoIdentificacao(@PathVariable String codigoIdentificacao){
         Recurso recurso = recursoService.buscarPorCodigoIdentificacao(codigoIdentificacao);
-        return ResponseEntity.ok(recurso);
+        RecursoResponseDto responseDto = new RecursoResponseDto(recurso);
+        return ResponseEntity.ok(responseDto);
     }
 
     @PostMapping("/cadastro")
-    public ResponseEntity<Recurso> criar(@Valid @RequestBody RecursoRequestDto dto){
+    public ResponseEntity<RecursoResponseDto> criar(@Valid @RequestBody RecursoRequestDto dto){
         Recurso novoRecurso = recursoService.salvar(dto);
         RecursoResponseDto responseDto = new RecursoResponseDto(novoRecurso);
-        return new ResponseEntity<>(novoRecurso, HttpStatus.CREATED);
+        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Recurso> atualizar(@PathVariable Long id,
-                                             @Valid @RequestBody RecursoRequestDto dto){
+    public ResponseEntity<RecursoResponseDto> atualizar(@PathVariable Long id,
+                                                        @Valid @RequestBody RecursoRequestDto dto){
         dto.setId(id);
         Recurso recursoAtualizado = recursoService.salvar(dto);
         RecursoResponseDto responseDto = new RecursoResponseDto(recursoAtualizado);
-        return ResponseEntity.ok(recursoAtualizado);
+        return ResponseEntity.ok(responseDto);
     }
 
     @DeleteMapping("/{id}")

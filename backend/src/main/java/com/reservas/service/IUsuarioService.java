@@ -24,7 +24,7 @@ public interface IUsuarioService {
 
     String autenticar(UsuarioAuthDto authDto);
 
-    void validarDuplicidade(String matricula, String nomeUsuario, String email);
+    void validarDuplicidade(String matricula, String nomeUsuario, String email, Long idUsuarioAtual);
 
     void deletar (Long id);
 

@@ -26,7 +26,6 @@ public class UsuarioRequestDto {
     @NotBlank(message = "O nome de usuário (login) é obrigatório.")
     private String nomeUsuario;
 
-    @NotBlank(message = "A senha é obrigatória.")
     @Size(min = 7, message = "A senha deve ter no mínimo 7 caracteres.")
     private String senha;
 

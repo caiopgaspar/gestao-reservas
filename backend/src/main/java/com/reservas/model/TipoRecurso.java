@@ -28,7 +28,7 @@ public class TipoRecurso {
     private String descricao;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "tipo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "tipo", fetch = FetchType.LAZY)
     private List<Recurso> recursos;
 
 
