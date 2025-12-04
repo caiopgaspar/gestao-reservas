@@ -1,0 +1,81 @@
+/* Estilos específicos para o componente de reservas */
+.card {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.table th {
+  border-top: none;
+  font-weight: 600;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.badge {
+  font-size: 0.75em;
+}
+
+/* Loading states */
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Estilo para campo desabilitado */
+.form-control:disabled {
+  background-color: #f8f9fa;
+  opacity: 1;
+  color: #6c757d;
+}
+
+.form-select:disabled {
+  background-color: #e9ecef;
+  opacity: 0.6;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+
+  .btn-sm {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.8rem;
+  }
+
+  .card-header .d-flex {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .card-header .form-select {
+    width: 100% !important;
+  }
+}
+
+/* Hover effects */
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.025);
+}
+
+/* Status badges custom colors */
+.bg-success { background-color: #198754 !important; }
+.bg-warning { background-color: #ffc107 !important; color: #000 !important; }
+.bg-danger { background-color: #dc3545 !important; }
+.bg-info { background-color: #0dcaf0 !important; color: #000 !important; }
+
+/* Botões desabilitados */
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Alertas de carregamento */
+.alert-info .spinner-border {
+  width: 1rem;
+  height: 1rem;
+}

@@ -1,0 +1,121 @@
+<div class="container-fluid mt-3">
+
+  <!-- CARD DE CADASTRO/EDIÇÃO -->
+  <div class="card">
+    <div class="card-header" [class.bg-primary]="!editando" [class.bg-warning]="editando">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0 text-white">
+          <i class="bi" [class.bi-plus-circle]="!editando" [class.bi-pencil]="editando"></i>
+          {{ editando ? 'Editar Tipo de Recurso' : 'Cadastrar Novo Tipo de Recurso' }}
+        </h5>
+
+        <button
+          type="button"
+          class="btn btn-outline-light btn-sm"
+          (click)="cancelar()"
+          [disabled]="salvando || carregando">
+          <i class="bi bi-arrow-left"></i> Voltar
+        </button>
+      </div>
+    </div>
+
+    <div class="card-body">
+
+      <!-- Loading ao carregar dados para edição -->
+      <div *ngIf="carregando && editando" class="alert alert-info mb-4">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+        Carregando dados do tipo de recurso...
+      </div>
+
+      <form [formGroup]="tipoRecursoForm" (ngSubmit)="onSubmit()" *ngIf="!carregando || !editando">
+
+        <div class="row g-3">
+
+          <!-- Nome -->
+          <div class="col-md-6">
+            <label for="nome" class="form-label">
+              Nome <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              id="nome"
+              formControlName="nome"
+              class="form-control"
+              [class.is-invalid]="tipoRecursoForm.get('nome')?.invalid && tipoRecursoForm.get('nome')?.touched"
+              placeholder="Ex: Equipamento, Sala, Veículo">
+
+            <div class="invalid-feedback" *ngIf="tipoRecursoForm.get('nome')?.errors?.['required']">
+              O nome é obrigatório
+            </div>
+            <div class="invalid-feedback" *ngIf="tipoRecursoForm.get('nome')?.errors?.['minlength']">
+              O nome deve ter pelo menos 2 caracteres
+            </div>
+            <div class="form-text">
+              Nome do tipo de recurso (deve ser único)
+            </div>
+          </div>
+
+          <!-- Descrição -->
+          <div class="col-md-6">
+            <label for="descricao" class="form-label">
+              Descrição
+            </label>
+            <input
+              type="text"
+              id="descricao"
+              formControlName="descricao"
+              class="form-control"
+              placeholder="Ex: Equipamentos de escritório, Salas de reunião, Veículos oficiais">
+
+            <div class="form-text">
+              Descrição opcional do tipo de recurso
+            </div>
+          </div>
+
+          <!-- Botões -->
+          <div class="col-12 mt-4">
+            <div class="d-flex justify-content-end gap-2">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="cancelar()"
+                [disabled]="salvando">
+                <i class="bi bi-x-circle me-1"></i>
+                Cancelar
+              </button>
+
+              <button
+                type="submit"
+                class="btn"
+                [class.btn-success]="!editando"
+                [class.btn-warning]="editando"
+                [disabled]="tipoRecursoForm.invalid || salvando">
+
+                <span *ngIf="!salvando">
+                  <i class="bi" [class.bi-check-lg]="!editando" [class.bi-pencil]="editando"></i>
+                  {{ editando ? 'Atualizar' : 'Cadastrar' }}
+                </span>
+
+                <span *ngIf="salvando">
+                  <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                  {{ editando ? 'Atualizando...' : 'Salvando...' }}
+                </span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </form>
+
+      <!-- Informações sobre campos obrigatórios -->
+      <div class="mt-4 pt-3 border-top">
+        <small class="text-muted">
+          <i class="bi bi-info-circle me-1"></i>
+          Campos marcados com <span class="text-danger">*</span> são obrigatórios
+        </small>
+      </div>
+
+    </div>
+  </div>
+
+</div>

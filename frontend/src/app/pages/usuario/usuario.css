@@ -1,0 +1,76 @@
+/* Estilos específicos para o componente de usuários */
+.card {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.table th {
+  border-top: none;
+  font-weight: 600;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+/* Loading states */
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+
+  .btn-sm {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.8rem;
+  }
+
+  .card-header .d-flex {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .card-header .form-control {
+    width: 100% !important;
+  }
+}
+
+/* Hover effects */
+.table-hover tbody tr:hover {
+  background-color: #e1e9f0;
+}
+
+.table.table-striped {
+    --bs-table-striped-bg: #e1e9f0; /* Example: light red for odd rows */
+    }
+
+/* Estilo para código de usuário */
+code {
+  background-color: #f8f9fa;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  color: #d63384;
+}
+
+/* Alertas personalizados */
+.alert {
+  border: none;
+  border-radius: 0.5rem;
+}
+
+.alert-success {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+}

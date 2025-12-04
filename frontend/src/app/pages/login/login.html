@@ -1,0 +1,103 @@
+<div class="login-container">
+  <div class="row justify-content-center align-items-center min-vh-100">
+    <div class="col-md-6 col-lg-4">
+      <!-- Card de Login -->
+      <div class="card login-card shadow">
+        <div class="card-header bg-primary text-white text-center py-4">
+          <i class="bi bi-person-check display-4 mb-3"></i>
+          <h2 class="card-title mb-0">Gestão de Reservas</h2>
+          <p class="mb-0 opacity-75">Faça login para continuar</p>
+        </div>
+
+        <div class="card-body p-4">
+          <!-- Mensagens de Feedback -->
+          <div *ngIf="mensagemSucesso" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            {{ mensagemSucesso }}
+            <div class="spinner-border spinner-border-sm ms-2" role="status">
+              <span class="visually-hidden">Redirecionando...</span>
+            </div>
+          </div>
+
+          <div *ngIf="mensagemErro" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            {{ mensagemErro }}
+            <button type="button" class="btn-close" (click)="mensagemErro = undefined"></button>
+          </div>
+
+          <!-- Formulário de Login -->
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <!-- Nome de Usuário -->
+            <div class="mb-3">
+              <label for="nomeUsuario" class="form-label">
+                <i class="bi bi-person me-1"></i>
+                Nome de Usuário
+              </label>
+              <input
+                id="nomeUsuario"
+                type="text"
+                formControlName="nomeUsuario"
+                class="form-control form-control-lg"
+                [class.is-invalid]="loginForm.get('nomeUsuario')?.invalid && loginForm.get('nomeUsuario')?.touched"
+                placeholder="Digite seu nome de usuário"
+                autocomplete="username">
+              <div class="invalid-feedback">
+                Nome de usuário é obrigatório
+              </div>
+            </div>
+
+            <!-- Senha -->
+            <div class="mb-4">
+              <label for="senha" class="form-label">
+                <i class="bi bi-lock me-1"></i>
+                Senha
+              </label>
+              <input
+                id="senha"
+                type="password"
+                formControlName="senha"
+                class="form-control form-control-lg"
+                [class.is-invalid]="loginForm.get('senha')?.invalid && loginForm.get('senha')?.touched"
+                placeholder="Digite sua senha"
+                autocomplete="current-password">
+              <div class="invalid-feedback">
+                Senha é obrigatória
+              </div>
+            </div>
+
+            <!-- Botão de Login -->
+            <div class="d-grid mb-3">
+              <button
+                type="submit"
+                class="btn btn-primary btn-lg"
+                [disabled]="loginForm.invalid || carregando">
+                <span *ngIf="!carregando">
+                  <i class="bi bi-box-arrow-in-right me-2"></i>
+                  Entrar
+                </span>
+                <span *ngIf="carregando">
+                  <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                  Entrando...
+                </span>
+              </button>
+            </div>
+
+            <!-- Links Adicionais -->
+            <div class="text-center">
+              <small class="text-muted">
+                Não tem uma conta?
+                <a routerLink="/usuario" class="text-decoration-none">Cadastre-se aqui</a>
+              </small>
+            </div>
+          </form>
+        </div>
+
+        <div class="card-footer text-center py-3 bg-light">
+          <small class="text-muted">
+            &copy; 2024 Gestão de Reservas. Todos os direitos reservados.
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

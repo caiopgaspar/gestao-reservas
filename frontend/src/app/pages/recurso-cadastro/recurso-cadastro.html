@@ -1,0 +1,215 @@
+<div class="container-fluid mt-3">
+  <!-- Card de Cadastro/Edição -->
+  <div class="card">
+    <div class="card-header" [class.bg-primary]="!editando" [class.bg-warning]="editando">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0 text-white">
+          <i class="bi" [class.bi-plus-circle]="!editando" [class.bi-pencil]="editando"></i>
+          {{ editando ? 'Editar Recurso' : 'Cadastrar Novo Recurso' }}
+        </h5>
+
+        <button
+          type="button"
+          class="btn btn-outline-light btn-sm"
+          (click)="cancelar()"
+          [disabled]="carregando">
+          <i class="bi bi-arrow-left"></i> Voltar
+        </button>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <!-- Mensagem de Carregamento (edição) -->
+      <div *ngIf="carregando && editando" class="alert alert-info">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+        Carregando dados do recurso...
+      </div>
+
+      <form [formGroup]="recursoForm" (ngSubmit)="onSubmit()" *ngIf="!carregando || !editando">
+        <div class="row g-3">
+
+          <!-- Nome do Recurso -->
+          <div class="col-md-6">
+            <label for="nome" class="form-label">
+              Nome do Recurso <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              id="nome"
+              formControlName="nome"
+              class="form-control"
+              [class.is-invalid]="recursoForm.get('nome')?.invalid && recursoForm.get('nome')?.touched"
+              placeholder="Ex: Projetor Multimídia, Sala de Reunião, Carro Oficial">
+
+            <div class="invalid-feedback" *ngIf="recursoForm.get('nome')?.errors?.['required']">
+              O nome do recurso é obrigatório
+            </div>
+            <div class="invalid-feedback" *ngIf="recursoForm.get('nome')?.errors?.['maxlength']">
+              O nome deve ter no máximo 100 caracteres
+            </div>
+            <div class="form-text">
+              Identifique claramente o recurso
+            </div>
+          </div>
+
+          <!-- Código de Identificação -->
+          <div class="col-md-6">
+            <label for="codigoIdentificacao" class="form-label">
+              Código de Identificação <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              id="codigoIdentificacao"
+              formControlName="codigoIdentificacao"
+              class="form-control"
+              [class.is-invalid]="recursoForm.get('codigoIdentificacao')?.invalid && recursoForm.get('codigoIdentificacao')?.touched"
+              placeholder="Ex: PROJ-001, SALA-201, CAR-005">
+
+            <div class="invalid-feedback" *ngIf="recursoForm.get('codigoIdentificacao')?.errors?.['required']">
+              O código de identificação é obrigatório
+            </div>
+            <div class="invalid-feedback" *ngIf="recursoForm.get('codigoIdentificacao')?.errors?.['maxlength']">
+              O código deve ter no máximo 50 caracteres
+            </div>
+            <div class="form-text">
+              Código único para identificar o recurso no sistema
+            </div>
+          </div>
+
+          <!-- Tipo de Recurso -->
+          <div class="col-md-6">
+            <label for="tipoRecursoId" class="form-label">
+              Tipo de Recurso <span class="text-danger">*</span>
+            </label>
+
+            <!-- Loading para tipos -->
+            <div *ngIf="carregandoTipos" class="alert alert-info py-2 mb-2">
+              <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+              Carregando tipos de recurso...
+            </div>
+
+            <select
+              id="tipoRecursoId"
+              formControlName="tipoRecursoId"
+              class="form-select"
+              [class.is-invalid]="recursoForm.get('tipoRecursoId')?.invalid && recursoForm.get('tipoRecursoId')?.touched"
+              [disabled]="carregandoTipos">
+
+              <option value="">Selecione um tipo...</option>
+              <option *ngFor="let tipo of tiposRecurso" [value]="tipo.id">
+                {{ tipo.nome }}
+              </option>
+            </select>
+
+            <div class="invalid-feedback" *ngIf="recursoForm.get('tipoRecursoId')?.errors?.['required']">
+              Selecione um tipo de recurso
+            </div>
+            <div class="form-text">
+              Categoria do recurso (equipamento, sala, veículo, etc.)
+            </div>
+          </div>
+
+          <!-- Capacidade -->
+          <div class="col-md-6">
+            <label for="capacidade" class="form-label">
+              Capacidade
+            </label>
+            <input
+              type="number"
+              id="capacidade"
+              formControlName="capacidade"
+              class="form-control"
+              [class.is-invalid]="recursoForm.get('capacidade')?.invalid && recursoForm.get('capacidade')?.touched"
+              placeholder="Ex: 10, 50, 100"
+              min="1">
+
+            <div class="invalid-feedback" *ngIf="recursoForm.get('capacidade')?.errors?.['min']">
+              A capacidade deve ser no mínimo 1
+            </div>
+            <div class="form-text">
+              Número de pessoas ou itens suportados (opcional)
+            </div>
+          </div>
+
+          <!-- Localização -->
+          <div class="col-12">
+            <label for="localizacao" class="form-label">
+              Localização
+            </label>
+            <input
+              type="text"
+              id="localizacao"
+              formControlName="localizacao"
+              class="form-control"
+              [class.is-invalid]="recursoForm.get('localizacao')?.invalid && recursoForm.get('localizacao')?.touched"
+              placeholder="Ex: Prédio A - Sala 201, Estacionamento Principal">
+
+            <div class="invalid-feedback" *ngIf="recursoForm.get('localizacao')?.errors?.['maxlength']">
+              A localização deve ter no máximo 200 caracteres
+            </div>
+            <div class="form-text">
+              Onde o recurso está localizado fisicamente (opcional)
+            </div>
+          </div>
+
+          <!-- Observações/Descrição (opcional) -->
+          <div class="col-12">
+            <label for="observacoes" class="form-label">
+              Observações
+            </label>
+            <textarea
+              id="observacoes"
+              class="form-control"
+              rows="3"
+              placeholder="Informações adicionais sobre o recurso (opcional)"></textarea>
+            <div class="form-text">
+              Detalhes importantes sobre o uso, manutenção ou características especiais
+            </div>
+          </div>
+
+          <!-- Botões de Ação -->
+          <div class="col-12 mt-4">
+            <div class="d-flex justify-content-end gap-2">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="cancelar()"
+                [disabled]="carregando">
+                <i class="bi bi-x-circle me-1"></i>
+                Cancelar
+              </button>
+
+              <button
+                type="submit"
+                class="btn"
+                [class.btn-success]="!editando"
+                [class.btn-warning]="editando"
+                [disabled]="recursoForm.invalid || carregando || carregandoTipos">
+
+                <span *ngIf="!carregando">
+                  <i class="bi" [class.bi-check-lg]="!editando" [class.bi-pencil]="editando"></i>
+                  {{ editando ? 'Atualizar' : 'Cadastrar' }}
+                </span>
+
+                <span *ngIf="carregando">
+                  <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                  Processando...
+                </span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </form>
+
+      <!-- Informações sobre campos obrigatórios -->
+      <div class="mt-4 pt-3 border-top">
+        <small class="text-muted">
+          <i class="bi bi-info-circle me-1"></i>
+          Campos marcados com <span class="text-danger">*</span> são obrigatórios
+        </small>
+      </div>
+
+    </div>
+  </div>
+</div>
