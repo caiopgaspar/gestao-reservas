@@ -2,7 +2,7 @@ package com.reservas.model.enums;
 
 public enum StatusReservaEnum {
     PENDENTE,
-    APROVADA,
+    CONFIRMADA,
     REJEITADA,
     CANCELADA,
     CONCLUIDA

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/tiposrecurso")
+@RequestMapping("/api/tipo-recurso")
 public class TipoRecursoController {
 
     private final ITipoRecursoService tipoRecursoService;

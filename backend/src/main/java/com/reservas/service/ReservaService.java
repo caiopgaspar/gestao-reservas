@@ -89,7 +89,7 @@ public class ReservaService implements IReservaService{
         reserva.setFinalidade(dto.getFinalidade());
 
         if (reserva.getId() == null) {
-            reserva.setStatus(StatusReservaEnum.APROVADA);
+            reserva.setStatus(StatusReservaEnum.CONFIRMADA);
         }
 
         return reservaRepository.save(reserva);
