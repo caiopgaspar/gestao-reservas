@@ -4,9 +4,12 @@ import { TipoRecursoCadastro } from './pages/tipo-recurso-cadastro/tipo-recurso-
 import { Recurso } from './pages/recurso/recurso';
 import { RecursoCadastro } from './pages/recurso-cadastro/recurso-cadastro';
 import { Usuario } from './pages/usuario/usuario';
+import { UsuarioCadastro } from './pages/usuario-cadastro/usuario-cadastro';
 import { Reserva } from './pages/reserva/reserva';
+import { ReservaCadastro } from './pages/reserva-cadastro/reserva-cadastro';
 import { Index } from './pages/index/index';
 import { Login } from './pages/login/login';
+import { AuthGuard } from './guards/auth.guard';
 
 
 export const routes: Routes = [
@@ -19,10 +22,15 @@ export const routes: Routes = [
 
   { path: 'recurso', component: Recurso },
   { path: 'recurso/cadastro', component: RecursoCadastro },
+  { path: 'recurso/cadastro/:id', component: RecursoCadastro },
 
-  { path: 'usuario', component: Usuario },
+  { path: 'usuario', component: Usuario,canActivate: [AuthGuard] },
+  { path: 'usuario/cadastro', component: UsuarioCadastro, canActivate: [AuthGuard] },
+  { path: 'usuario/cadastro/:id', component: UsuarioCadastro, canActivate: [AuthGuard] },
 
   { path: 'reserva', component: Reserva },
+  { path: 'reserva/cadastro', component: ReservaCadastro },
+  { path: 'reserva/cadastro/:id', component: ReservaCadastro },
 
   { path: 'login', component: Login },
 

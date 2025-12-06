@@ -8,10 +8,7 @@ import { TipoRecurso as TipoRecursoInterface, TipoRecursoService } from '../../s
 @Component({
   selector: 'app-tipo-recurso-cadastro',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule
-  ],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './tipo-recurso-cadastro.html',
   styleUrls: ['./tipo-recurso-cadastro.css']
 })
@@ -36,7 +33,6 @@ export class TipoRecursoCadastro implements OnInit {
   }
 
   ngOnInit(): void {
-    // Verificar se é edição
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.editando = true;
@@ -47,7 +43,9 @@ export class TipoRecursoCadastro implements OnInit {
   }
 
   carregarTipoRecurso(id: number): void {
-    this.carregando = true;
+   // this.carregando = true;
+    this.desabilitarCamposFormulario();
+
     this.tipoRecursoService.buscarPorId(id).subscribe({
       next: (tipo: TipoRecursoInterface) => {
         this.tipoRecursoForm.patchValue({
@@ -55,36 +53,37 @@ export class TipoRecursoCadastro implements OnInit {
           descricao: tipo.descricao || ''
         });
         this.carregando = false;
+        this.habilitarCamposFormulario();
       },
       error: (erro: HttpErrorResponse) => {
         console.error('Erro ao carregar tipo de recurso:', erro);
         alert('Erro ao carregar tipo de recurso');
         this.carregando = false;
+        this.habilitarCamposFormulario();
         this.router.navigate(['/tipo-recurso']);
       }
     });
   }
 
   onSubmit(): void {
-    // ✅ Validação mais robusta
     if (this.tipoRecursoForm.invalid || this.salvando) {
       this.marcarCamposComoSujos();
       return;
     }
 
-    this.salvando = true; // ✅ Desabilita o botão durante o salvamento
+    this.salvando = true;
+    this.desabilitarCamposFormulario();
 
     const tipoRecurso: TipoRecursoInterface = {
       nome: this.tipoRecursoForm.value.nome.trim(),
       descricao: this.tipoRecursoForm.value.descricao?.trim() || ''
     };
 
-    // Se for edição, adiciona o ID
     if (this.editando && this.tipoRecursoId) {
       tipoRecurso.id = this.tipoRecursoId;
     }
 
-    console.log('Tentando salvar:', tipoRecurso); // ✅ Debug
+    console.log('Tentando salvar:', tipoRecurso);
 
     const operacao = this.editando && this.tipoRecursoId
       ? this.tipoRecursoService.atualizar(this.tipoRecursoId, tipoRecurso)
@@ -92,7 +91,7 @@ export class TipoRecursoCadastro implements OnInit {
 
     operacao.subscribe({
       next: (tipoSalvo) => {
-        console.log('Salvo com sucesso:', tipoSalvo); // ✅ Debug
+        console.log('Salvo com sucesso:', tipoSalvo);
         alert(`Tipo de Recurso ${this.editando ? 'atualizado' : 'cadastrado'} com sucesso!`);
         this.router.navigate(['/tipo-recurso']);
       },
@@ -100,7 +99,6 @@ export class TipoRecursoCadastro implements OnInit {
         console.error('Erro detalhado ao salvar:', erro);
         let mensagemErro = `Erro ao ${this.editando ? 'atualizar' : 'cadastrar'} tipo de recurso`;
 
-        // ✅ Mensagens de erro mais específicas
         if (erro.status === 400) {
           mensagemErro = 'Dados inválidos. Verifique os campos.';
         } else if (erro.status === 409) {
@@ -110,7 +108,8 @@ export class TipoRecursoCadastro implements OnInit {
         }
 
         alert(mensagemErro);
-        this.salvando = false; // ✅ Reabilita o botão mesmo em caso de erro
+        this.salvando = false;
+        this.habilitarCamposFormulario();
       }
     });
   }
@@ -122,6 +121,24 @@ export class TipoRecursoCadastro implements OnInit {
   private marcarCamposComoSujos(): void {
     Object.keys(this.tipoRecursoForm.controls).forEach(key => {
       this.tipoRecursoForm.get(key)?.markAsTouched();
+    });
+  }
+
+  private desabilitarCamposFormulario(): void {
+    Object.keys(this.tipoRecursoForm.controls).forEach(key => {
+      const control = this.tipoRecursoForm.get(key);
+      if (control) {
+        control.disable();
+      }
+    });
+  }
+
+  private habilitarCamposFormulario(): void {
+    Object.keys(this.tipoRecursoForm.controls).forEach(key => {
+      const control = this.tipoRecursoForm.get(key);
+      if (control && control.enabled === false) {
+        control.enable();
+      }
     });
   }
 }

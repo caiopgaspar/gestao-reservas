@@ -1,108 +1,98 @@
-<div class="container-fluid mt-3">
+<div class="container-fluid mt-0">
 
   <!-- CARD DE FILTROS -->
-  <div class="card mb-4">
-    <div class="card-header bg-light">
+  <div class="card mb-4 border-0">
+
+    <div class="card-header bg-transparent border-0">
+
       <div class="d-flex justify-content-between align-items-center">
+
         <h5 class="card-title mb-0">
-          <i class="bi bi-filter me-2"></i>
-          Filtros de Busca
+          Listagem de Tipos de Recurso
         </h5>
 
-        <button
-          type="button"
-          class="btn btn-success btn-sm"
-          (click)="navegarParaCadastro()">
-          <i class="bi bi-plus-circle me-1"></i>
-          Novo Tipo
-        </button>
+
+        <div class="d-flex gap-2">
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            (click)="aplicarFiltros()">
+                <span *ngIf="!carregandoLista">
+                  <i class="bi bi-search me-1"></i>
+                  Filtrar
+                </span>
+            <span *ngIf="carregandoLista">
+                  <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                  Buscando...
+                </span>
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            (click)="navegarParaCadastro()">
+            <i class="bi bi-plus-square-fill me-1"></i>
+            Novo
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            (click)="limparFiltros()">
+            <i class="bi bi-eraser-fill me-1"></i>
+            Limpar
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            (click)="navegarParaInicio()">
+            <i class="bi bi-x-circle-fill me-1"></i>
+            Fechar
+          </button>
+        </div>
+
       </div>
+
     </div>
 
     <div class="card-body">
       <form [formGroup]="filtroForm">
         <div class="row g-3">
-
-          <!-- Nome -->
-          <div class="col-md-12">
-            <label for="nome" class="form-label">Nome do Tipo</label>
+          <div class="d-flex align-items-center mb-3">
+            <label for="nome" class="form-label me-3" style="min-width: 120px;">Nome do Tipo:</label>
             <input
               type="text"
               id="nome"
               formControlName="nome"
               class="form-control"
+              style="max-width: 60%"
               placeholder="Digite parte do nome do tipo de recurso">
-            <div class="form-text">
-              Busca por nome do tipo de recurso
-            </div>
           </div>
-
-          <!-- Botões de Ação -->
-          <div class="col-12">
-            <div class="d-flex justify-content-end gap-2 mt-3">
-              <button
-                type="button"
-                class="btn btn-outline-secondary"
-                (click)="limparFiltros()"
-                [disabled]="carregandoLista || (!temFiltrosPreenchidos() && !filtrosAplicados)">
-                <i class="bi bi-x-circle me-1"></i>
-                Limpar
-              </button>
-
-              <button
-                type="button"
-                class="btn btn-primary"
-                (click)="aplicarFiltros()"
-                [disabled]="carregandoLista">
-                <span *ngIf="!carregandoLista">
-                  <i class="bi bi-search me-1"></i>
-                  Buscar
-                </span>
-                <span *ngIf="carregandoLista">
-                  <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                  Buscando...
-                </span>
-              </button>
-            </div>
-          </div>
-
         </div>
       </form>
     </div>
+
   </div>
 
+  <table class="table table-hover table-striped mt-o mb-0 p-0">
+    <thead class="table-light">
+    <tr>
+      <th style="width: 30%;">Nome</th>
+      <th style="width: 60%;">Descrição</th>
+      <th style="width: 10%;" class="text-center">Ações</th>
+    </tr>
+    </thead>
+  </table>
+
   <!-- CARD DE RESULTADOS -->
-  <div class="card">
-    <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-      <h5 class="card-title mb-0">
-        <i class="bi bi-tags me-2"></i>
-        Tipos de Recurso
-      </h5>
+  <div class="card p-0 border-0 rounded-0">
 
-      <span class="badge bg-light text-dark" *ngIf="filtrosAplicados">
-        {{ tiposRecurso.length }} resultado(s)
-      </span>
-    </div>
-
-    <div class="card-body">
+    <div class="card-body p-0 border-0 rounded-0">
 
       <!-- INSTRUÇÕES INICIAIS -->
       <div *ngIf="mostrarInstrucoes && !carregandoLista" class="text-center py-5">
-        <div class="mb-4">
-          <i class="bi bi-search display-4 text-muted"></i>
-        </div>
-        <h5 class="text-muted mb-3">Buscar Tipos de Recurso</h5>
-        <p class="text-muted mb-4">
-          Use o filtro acima para buscar tipos de recurso por nome.<br>
-          Clique em "Buscar" para exibir os resultados.
-        </p>
-        <button
-          type="button"
-          class="btn btn-outline-primary"
-          (click)="carregarTiposRecurso()">
-          <i class="bi bi-eye me-1"></i>
-          Mostrar Todos os Tipos
-        </button>
+        <h5 class="text-muted mb-3">Sem dados</h5>
       </div>
 
       <!-- LOADING -->
@@ -123,42 +113,19 @@
           Não foram encontrados tipos de recurso com os filtros aplicados.<br>
           Tente ajustar os critérios de busca ou cadastre um novo tipo.
         </p>
-        <button
-          type="button"
-          class="btn btn-outline-primary me-2"
-          (click)="limparFiltros()">
-          <i class="bi bi-filter me-1"></i>
-          Limpar Filtros
-        </button>
-        <button
-          type="button"
-          class="btn btn-success"
-          (click)="navegarParaCadastro()">
-          <i class="bi bi-plus-circle me-1"></i>
-          Cadastrar Novo Tipo
-        </button>
       </div>
 
+
+
       <!-- TABELA DE RESULTADOS -->
-      <div *ngIf="filtrosAplicados && !carregandoLista && tiposRecurso.length > 0" class="table-responsive">
+      <div *ngIf="filtrosAplicados && !carregandoLista && tiposRecurso.length > 0" class="table-responsive mt-0">
         <table class="table table-hover table-striped">
-          <thead class="table-dark">
-          <tr>
-            <th style="width: 10%;">ID</th>
-            <th style="width: 30%;">Nome</th>
-            <th style="width: 45%;">Descrição</th>
-            <th style="width: 15%;" class="text-center">Ações</th>
-          </tr>
-          </thead>
           <tbody>
           <tr *ngFor="let tipo of tiposRecurso">
-            <td>
-              <span class="badge bg-dark">#{{ tipo.id }}</span>
+            <td style="width: 30%">
+              <span>{{ tipo.nome }}</span>
             </td>
-            <td>
-              <strong>{{ tipo.nome }}</strong>
-            </td>
-            <td>
+            <td style="width: 60%">
                 <span *ngIf="tipo.descricao && tipo.descricao.trim() !== ''; else semDescricao">
                   {{ tipo.descricao }}
                 </span>
@@ -166,18 +133,18 @@
                 <span class="text-muted fst-italic">Sem descrição</span>
               </ng-template>
             </td>
-            <td class="text-center">
+            <td class="text-center" style="width: 10%">
               <div class="btn-group btn-group-sm" role="group">
                 <button
                   type="button"
-                  class="btn btn-warning"
+                  class="btn btn-outlined-light "
                   (click)="navegarParaEdicao(tipo.id!)"
                   title="Editar Tipo">
                   <i class="bi bi-pencil"></i>
                 </button>
                 <button
                   type="button"
-                  class="btn btn-danger"
+                  class="btn btn-outlined-light"
                   (click)="deletarTipoRecurso(tipo.id!)"
                   title="Excluir Tipo">
                   <i class="bi bi-trash"></i>
@@ -189,9 +156,8 @@
         </table>
 
         <!-- Contador de resultados -->
-        <div class="mt-3 text-muted small">
-          <i class="bi bi-info-circle me-1"></i>
-          Exibindo {{ tiposRecurso.length }} tipo(s) de recurso
+        <div class="mt-3 text-muted fw-bold small">
+          {{ tiposRecurso.length }} Registro(s)
         </div>
       </div>
 

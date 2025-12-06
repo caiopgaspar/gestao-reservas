@@ -1,61 +1,62 @@
 <div class="container-fluid">
   <div class="row">
+
     <!-- Sidebar -->
     <div class="col-auto px-0" style="background-color: #f4f4f4">
-      <div id="sidebar" class="collapse collapse-horizontal show border-end"
+      <div id="sidebar" class="collapse collapse-horizontal show"
            [class.sidebar-expanded]="sidebarExpanded">
         <div id="sidebar-nav" class="d-flex flex-column vh-100">
 
           <!-- Botão Toggle -->
           <div class="border-bottom text-white d-flex align-items-center" style="background-color: #5e87b0; max-height: 46px">
             <button class="btn btn-sm me-2" (click)="toggleSidebar()">
-              <i class="bi bi-list fs-3"></i>
+              <i class="bi bi-list fs-3 text-light"></i>
             </button>
-            <span *ngIf="sidebarExpanded" class="fw-bold">Menu</span>
           </div>
 
           <!-- Itens do Menu -->
           <ul class="nav nav-pills flex-column mb-auto flex-grow-1">
             <li class="nav-item">
-              <a routerLink="/index" routerLinkActive="active"
+              <a routerLink="/index" routerLinkActive="menu-selecionado"
+                 [routerLinkActiveOptions]="{exact: true}"
                  class="nav-link text-dark d-flex align-items-center">
                 <i class="bi bi-house fs-5"></i>
-                <span *ngIf="sidebarExpanded" class="ms-2">Home</span>
+                <span *ngIf="sidebarExpanded" class="ms-4">Home</span>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/tipo-recurso" routerLinkActive="active"
+              <a routerLink="/tipo-recurso" routerLinkActive="menu-selecionado"
                  class="nav-link text-dark d-flex align-items-center">
                 <i class="bi bi-collection fs-5"></i>
-                <span *ngIf="sidebarExpanded" class="ms-2">Tipos de Recurso</span>
+                <span *ngIf="sidebarExpanded" class="ms-4">Tipos de Recurso</span>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/recurso" routerLinkActive="active"
+              <a routerLink="/recurso" routerLinkActive="menu-selecionado"
                  class="nav-link text-dark d-flex align-items-center">
                 <i class="bi bi-cast fs-5"></i>
-                <span *ngIf="sidebarExpanded" class="ms-2">Recurso</span>
+                <span *ngIf="sidebarExpanded" class="ms-4">Recurso</span>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/reserva" routerLinkActive="active"
+              <a routerLink="/reserva" routerLinkActive="menu-selecionado"
                  class="nav-link text-dark d-flex align-items-center">
                 <i class="bi bi-calendar-check fs-5"></i>
-                <span *ngIf="sidebarExpanded" class="ms-2">Reserva</span>
+                <span *ngIf="sidebarExpanded" class="ms-4">Reserva</span>
               </a>
             </li>
             <li class="nav-item">
-              <a routerLink="/usuario" routerLinkActive="active"
+              <a routerLink="/usuario" routerLinkActive="menu-selecionado"
                  class="nav-link text-dark d-flex align-items-center">
                 <i class="bi bi-person fs-5"></i>
-                <span *ngIf="sidebarExpanded" class="ms-2">Reserva</span>
+                <span *ngIf="sidebarExpanded" class="ms-4">Usuário</span>
               </a>
             </li>
           </ul>
 
           <!-- Footer da Sidebar -->
           <div class="p-3 border-top" *ngIf="sidebarExpanded">
-            <small class="text-muted">Gestão de Reservas</small>
+            <small class="text-muted">Gestão de Reservas - V 1.0</small>
           </div>
         </div>
       </div>
@@ -77,6 +78,6 @@
         <router-outlet></router-outlet>
       </div>
     </main>
+
   </div>
 </div>
-

@@ -1,1 +1,230 @@
-<p>reserva-cadastro works!</p>
+<div class="container-fluid mt-3 border-0">
+
+  <!-- CARD DE CADASTRO/EDIÇÃO -->
+  <div class="card border-0">
+
+    <form [formGroup]="reservaForm" (ngSubmit)="onSubmit()">
+
+      <div class="card-header bg-transparent border-0">
+
+        <div class="d-flex justify-content-between align-items-center">
+
+          <h5 class="card-title mb-0">
+            <i class="bi" [class.bi-calendar-plus]="!editando" [class.bi-pencil]="editando"></i>
+            {{ editando ? 'Editar Reserva' : 'Nova Reserva' }}
+          </h5>
+
+          <div class="d-flex gap-2">
+
+            <button
+              type="submit"
+              class="btn btn-outline-secondary btn-sm"
+              [disabled]="reservaForm.invalid || carregando || carregandoRecursos || carregandoUsuarios">
+              <span *ngIf="!carregando">
+                <i class="bi bi-floppy2-fill me-1"></i>
+                {{ editando ? 'Atualizar' : 'Reservar' }}
+              </span>
+              <span *ngIf="carregando">
+                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                {{ editando ? 'Atualizando...' : 'Salvando...' }}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-sm"
+              (click)="cancelar()">
+              <i class="bi bi-ban me-1"></i>
+              Cancelar
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-sm"
+              (click)="cancelar()">
+              <i class="bi bi-x-circle-fill me-1"></i>
+              Fechar
+            </button>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body">
+
+        <!-- Loading ao carregar dados para edição -->
+        <div *ngIf="carregando && editando" class="alert alert-info mb-4">
+          <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+          Carregando dados da reserva...
+        </div>
+
+        <!-- Loading para recursos -->
+        <div *ngIf="carregandoRecursos" class="alert alert-info mb-4">
+          <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+          Carregando recursos...
+        </div>
+
+        <!-- Loading para usuários (apenas admin) -->
+        <div *ngIf="isAdmin && carregandoUsuarios" class="alert alert-info mb-4">
+          <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+          Carregando usuários...
+        </div>
+
+        <div class="mt-0 pt-3 border-top">
+
+          <!-- Data/Hora Início -->
+          <div class="row g-2 align-items-center mt-3">
+            <div class="col-2 text-end">
+              <label for="dataHoraInicio" class="form-label mb-0">
+                Início: <span class="text-danger">*</span>
+              </label>
+            </div>
+
+            <div class="col-9">
+              <input
+                id="dataHoraInicio"
+                type="datetime-local"
+                formControlName="dataHoraInicio"
+                class="form-control form-control-sm"
+                style="max-width: 70%"
+                [class.is-invalid]="(reservaForm.get('dataHoraInicio')?.invalid && reservaForm.get('dataHoraInicio')?.touched) || reservaForm.errors?.['dataNoPassado']"
+                [disabled]="carregando || carregandoRecursos || carregandoUsuarios">
+
+              <div class="invalid-feedback" *ngIf="reservaForm.get('dataHoraInicio')?.errors?.['required'] && reservaForm.get('dataHoraInicio')?.touched">
+                Data e hora de início são obrigatórias
+              </div>
+              <div class="invalid-feedback" *ngIf="reservaForm.errors?.['dataNoPassado']">
+                A data de início não pode ser no passado
+              </div>
+            </div>
+          </div>
+
+          <!-- Data/Hora Fim -->
+          <div class="row g-2 align-items-center mt-0">
+            <div class="col-2 text-end">
+              <label for="dataHoraFim" class="form-label mb-0">
+                Término: <span class="text-danger">*</span>
+              </label>
+            </div>
+
+            <div class="col-9">
+              <input
+                id="dataHoraFim"
+                type="datetime-local"
+                formControlName="dataHoraFim"
+                class="form-control form-control-sm"
+                style="max-width: 70%"
+                [class.is-invalid]="(reservaForm.get('dataHoraFim')?.invalid && reservaForm.get('dataHoraFim')?.touched) || reservaForm.errors?.['dataFimAnterior']"
+                [disabled]="carregando || carregandoRecursos || carregandoUsuarios">
+
+              <div class="invalid-feedback" *ngIf="reservaForm.get('dataHoraFim')?.errors?.['required'] && reservaForm.get('dataHoraFim')?.touched">
+                Data e hora de término são obrigatórias
+              </div>
+              <div class="invalid-feedback" *ngIf="reservaForm.errors?.['dataFimAnterior']">
+                A data de término deve ser posterior à data de início
+              </div>
+            </div>
+          </div>
+
+          <!-- Recurso -->
+          <div class="row g-2 align-items-center mt-3">
+            <div class="col-2 text-end">
+              <label for="recursoId" class="form-label mb-0">
+                Recurso: <span class="text-danger">*</span>
+              </label>
+            </div>
+
+            <div class="col-9">
+              <select
+                id="recursoId"
+                formControlName="recursoId"
+                class="form-select form-select-sm"
+                style="max-width: 70%"
+                [class.is-invalid]="reservaForm.get('recursoId')?.invalid && reservaForm.get('recursoId')?.touched"
+                [disabled]="carregando || carregandoRecursos || carregandoUsuarios">
+                <option value="">Selecione um recurso...</option>
+                <option *ngFor="let recurso of recursos" [value]="recurso.id">
+                  {{ recurso.codigoIdentificacao }} - {{ recurso.nome }}
+                </option>
+              </select>
+
+              <div class="invalid-feedback" *ngIf="reservaForm.get('recursoId')?.errors?.['required'] && reservaForm.get('recursoId')?.touched">
+                Selecione um recurso
+              </div>
+            </div>
+          </div>
+
+          <!-- Usuário -->
+          <div class="row g-2 align-items-center mt-0">
+            <div class="col-2 text-end">
+              <label for="usuarioId" class="form-label mb-0">
+                Usuário: <span class="text-danger">*</span>
+              </label>
+            </div>
+
+            <div class="col-9">
+              <!-- Para administradores: select de usuários -->
+              <div *ngIf="isAdmin">
+                <select
+                  id="usuarioId"
+                  formControlName="usuarioId"
+                  class="form-select form-select-sm"
+                  style="max-width: 70%"
+                  [class.is-invalid]="reservaForm.get('usuarioId')?.invalid && reservaForm.get('usuarioId')?.touched"
+                  [disabled]="carregando || carregandoRecursos || carregandoUsuarios">
+                  <option value="">Selecione um usuário...</option>
+                  <option *ngFor="let usuario of usuarios" [value]="usuario.id">
+                    {{ usuario.matricula }} - {{ usuario.nomeCompleto }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Para usuários normais: campo fixo -->
+              <div *ngIf="!isAdmin">
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  style="max-width: 70%"
+                  [value]="usuarioLogado?.nomeCompleto || 'Usuário não identificado'"
+                  disabled>
+                <input type="hidden" formControlName="usuarioId">
+              </div>
+
+              <div class="invalid-feedback" *ngIf="reservaForm.get('usuarioId')?.errors?.['required'] && reservaForm.get('usuarioId')?.touched">
+                Selecione um usuário
+              </div>
+            </div>
+          </div>
+
+          <!-- Finalidade -->
+          <div class="row g-2 align-items-start mt-0">
+            <div class="col-2 text-end">
+              <label for="finalidade" class="form-label mb-0 pt-2">
+                Finalidade:
+              </label>
+            </div>
+
+            <div class="col-9">
+              <textarea
+                id="finalidade"
+                formControlName="finalidade"
+                class="form-control form-control-sm"
+                style="max-width: 70%"
+                rows="3"
+                placeholder="Descreva a finalidade da reserva (opcional)"
+                maxlength="150"
+                [disabled]="carregando || carregandoRecursos || carregandoUsuarios"></textarea>
+              <small class="text-muted">
+                {{ reservaForm.get('finalidade')?.value?.length || 0 }}/150 caracteres
+              </small>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </form>
+
+  </div>
+</div>

@@ -40,14 +40,24 @@ export class RecursoCadastro implements OnInit {
   }
 
   ngOnInit(): void {
+    // Desabilitar todos os campos inicialmente
+    this.desabilitarTodosCampos();
+
+    // Carregar tipos de recurso
     this.carregarTiposRecurso();
 
-    // Verificar se é edição
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.editando = true;
         this.recursoId = +params['id'];
         this.carregarRecurso(this.recursoId);
+      } else {
+        // Se não for edição, habilitar campos após carregar tipos
+        setTimeout(() => {
+          if (!this.carregandoTipos) {
+            this.habilitarTodosCampos();
+          }
+        }, 100);
       }
     });
   }
@@ -58,11 +68,22 @@ export class RecursoCadastro implements OnInit {
       next: (tipos) => {
         this.tiposRecurso = tipos;
         this.carregandoTipos = false;
+
+        // Se for cadastro novo (não edição), habilitar campos
+        if (!this.editando) {
+          this.habilitarTodosCampos();
+        }
+        // Se for edição e já carregou o recurso, habilitar campos
+        if (this.editando && !this.carregando) {
+          this.habilitarTodosCampos();
+        }
       },
       error: (erro: HttpErrorResponse) => {
         console.error('Erro ao carregar tipos de recurso:', erro);
         alert('Erro ao carregar tipos de recurso');
         this.carregandoTipos = false;
+
+        this.habilitarTodosCampos();
       }
     });
   }
@@ -79,11 +100,17 @@ export class RecursoCadastro implements OnInit {
           tipoRecursoId: recurso.tipoRecursoId
         });
         this.carregando = false;
+
+        // Habilitar campos após carregar dados
+        if (!this.carregandoTipos) {
+          this.habilitarTodosCampos();
+        }
       },
       error: (erro: HttpErrorResponse) => {
         console.error('Erro ao carregar recurso:', erro);
         alert('Erro ao carregar recurso');
         this.carregando = false;
+        this.habilitarTodosCampos(); // Habilitar campos mesmo com erro
         this.router.navigate(['/recurso']);
       }
     });
@@ -96,6 +123,8 @@ export class RecursoCadastro implements OnInit {
     }
 
     this.carregando = true;
+    this.desabilitarTodosCampos(); // Desabilitar durante o salvamento
+
     const recursoData: RecursoRequestDto = this.recursoForm.value;
 
     const operacao = this.editando && this.recursoId
@@ -111,6 +140,7 @@ export class RecursoCadastro implements OnInit {
         console.error('Erro ao salvar recurso:', erro);
         alert(`Erro ao ${this.editando ? 'atualizar' : 'cadastrar'} recurso`);
         this.carregando = false;
+        this.habilitarTodosCampos(); // Reabilitar em caso de erro
       }
     });
   }
@@ -122,6 +152,25 @@ export class RecursoCadastro implements OnInit {
   private marcarCamposComoSujos(): void {
     Object.keys(this.recursoForm.controls).forEach(key => {
       this.recursoForm.get(key)?.markAsTouched();
+    });
+  }
+
+  // Métodos para controle de campos
+  private desabilitarTodosCampos(): void {
+    Object.keys(this.recursoForm.controls).forEach(key => {
+      const control = this.recursoForm.get(key);
+      if (control) {
+        control.disable();
+      }
+    });
+  }
+
+  private habilitarTodosCampos(): void {
+    Object.keys(this.recursoForm.controls).forEach(key => {
+      const control = this.recursoForm.get(key);
+      if (control && control.enabled === false) {
+        control.enable();
+      }
     });
   }
 }

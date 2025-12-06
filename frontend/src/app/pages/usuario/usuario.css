@@ -1,76 +1,331 @@
-/* Estilos específicos para o componente de usuários */
+.error {
+  border: 1px solid red;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.8em;
+  margin-top: 4px;
+}
+
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loading {
+  position: relative;
+  color: transparent;
+}
+
+.loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin: -8px 0 0 -8px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  border-right-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0rem;
+  margin-bottom: 0rem;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: transparent;
+  color: #959595;
+  font-size: small;
+  font-weight: normal;
+}
+
+/* Estilos específicos para a tabela de usuários */
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+  cursor: default;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Botões de ação */
+.btn-group.btn-group-sm {
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.btn-group.btn-group-sm .btn {
+  border: none;
+  border-radius: 0;
+  padding: 4px 8px;
+  background-color: transparent;
+  color: #6c757d;
+  transition: all 0.2s ease;
+}
+
+.btn-group.btn-group-sm .btn:hover {
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+.btn-group.btn-group-sm .btn:first-child {
+  border-right: 1px solid #dee2e6;
+}
+
+.btn-group.btn-group-sm .btn:last-child:hover {
+  color: #dc3545;
+}
+
+/* Estilos para campos de formulário */
+.form-control, .form-select {
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 14px;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  outline: 0;
+}
+
+.form-label {
+  margin-bottom: 0;
+  font-weight: 500;
+  color: #495057;
+}
+
+/* Botões principais */
+.btn {
+  padding: 5px 10px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-secondary {
+  color: #6c757d;
+  border-color: #6c757d;
+  background-color: transparent;
+}
+
+.btn-outline-secondary:hover:not(:disabled) {
+  color: #fff;
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.btn-outline-secondary:disabled {
+  color: #6c757d;
+  background-color: transparent;
+  opacity: 0.6;
+}
+
+/* Cards */
 .card {
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-  border: 1px solid rgba(0, 0, 0, 0.125);
+  border: none;
 }
 
-.table th {
-  border-top: none;
-  font-weight: 600;
+.card.border-0 {
+  box-shadow: none;
 }
 
-.btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
+.card-header.bg-transparent {
+  padding: 1rem 0;
+  border-bottom: 1px solid #e9ecef;
 }
 
-/* Loading states */
-.spinner-border-sm {
+.card-body {
+  padding: 1rem 0;
+  background-color: transparent;
+}
+
+/* Alert de loading de usuários */
+.alert-info {
+  background-color: rgba(13, 110, 253, 0.1);
+  border: 1px solid rgba(13, 110, 253, 0.2);
+  color: #0d6efd;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+}
+
+.alert-info .spinner-border {
   width: 1rem;
   height: 1rem;
+  border-width: 0.15em;
+}
+
+/* Estilos para estados de carregamento e mensagens */
+.text-center.py-5 {
+  border-radius: 4px;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+.fst-italic {
+  font-style: italic;
+}
+
+.display-4 {
+  font-size: 3.5rem;
+  opacity: 0.3;
+}
+
+/* Spinner */
+.spinner-border {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.15em;
+}
+
+.spinner-border.text-primary {
+  color: #0d6efd !important;
+}
+
+.spinner-border.text-secondary {
+  color: #6c757d !important;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Contador de registros */
+.fw-bold {
+  font-weight: 600 !important;
+}
+
+.small {
+  font-size: 0.875em;
 }
 
 /* Responsividade */
 @media (max-width: 768px) {
-  .table-responsive {
-    font-size: 0.875rem;
-  }
-
-  .btn-sm {
-    padding: 0.2rem 0.4rem;
-    font-size: 0.8rem;
-  }
-
-  .card-header .d-flex {
+  .d-flex.align-items-center.mb-3 {
     flex-direction: column;
-    gap: 10px;
+    align-items: flex-start !important;
   }
 
-  .card-header .form-control {
-    width: 100% !important;
+  .form-label.me-3 {
+    margin-right: 0 !important;
+    margin-bottom: 8px;
+    min-width: auto !important;
+  }
+
+  .form-control,
+  .form-select {
+    max-width: 100% !important;
+    width: 100%;
+  }
+
+  .btn-group.btn-group-sm {
+    flex-direction: column;
+  }
+
+  .btn-group.btn-group-sm .btn {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .btn-group.btn-group-sm .btn:last-child {
+    border-bottom: none;
+  }
+
+  /* Ajuste para larguras das colunas em mobile */
+  table th,
+  table td {
+    width: auto !important;
+  }
+
+  /* Ajuste para textos informativos no contador */
+  .small span {
+    display: block;
+    margin-top: 4px;
   }
 }
 
-/* Hover effects */
-.table-hover tbody tr:hover {
-  background-color: #e1e9f0;
+/* Estilos para o formulário desabilitado */
+.form-control:disabled,
+.form-select:disabled {
+  background-color: #e9ecef;
+  opacity: 1;
+  cursor: not-allowed;
 }
 
-.table.table-striped {
-    --bs-table-striped-bg: #e1e9f0; /* Example: light red for odd rows */
-    }
-
-/* Estilo para código de usuário */
-code {
-  background-color: #f8f9fa;
-  padding: 0.2rem 0.4rem;
-  border-radius: 0.25rem;
-  font-size: 0.875em;
-  color: #d63384;
+/* Margens e paddings específicos */
+.mt-0 {
+  margin-top: 0 !important;
 }
 
-/* Alertas personalizados */
-.alert {
-  border: none;
-  border-radius: 0.5rem;
+.mb-0 {
+  margin-bottom: 0 !important;
 }
 
-.alert-success {
-  background-color: #d1e7dd;
-  color: #0f5132;
+.p-0 {
+  padding: 0 !important;
 }
 
-.alert-danger {
-  background-color: #f8d7da;
-  color: #721c24;
+.mb-3 {
+  margin-bottom: 1rem !important;
+}
+
+.mb-4 {
+  margin-bottom: 1.5rem !important;
+}
+
+.mt-3 {
+  margin-top: 1rem !important;
+}
+
+.gap-2 {
+  gap: 0.5rem !important;
+}
+
+/* Borda arredondada removida */
+.rounded-0 {
+  border-radius: 0 !important;
+}
+
+/* Estilo para alert sem borda */
+.border-0 {
+  border: none !important;
+}
+
+/* Texto nas células */
+td span {
+  word-break: break-word;
 }

@@ -1,228 +1,181 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { UsuarioService, UsuarioResponseDto, UsuarioRequestDto, FiltroUsuario, UsuarioAuthDto } from '../../services/usuario';
+import { UsuarioService, UsuarioResponseDto, FiltroUsuario } from '../../services/usuario';
 import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-usuario',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './usuario.html',
   styleUrls: ['./usuario.css']
 })
 export class Usuario implements OnInit {
 
-  // Dados
   usuarios: UsuarioResponseDto[] = [];
-  usuarioAutenticado: UsuarioResponseDto | null = null;
-  usuarioEditando?: UsuarioResponseDto;
-
-  // Formulários
-  cadastroForm: FormGroup;
-  perfilForm: FormGroup;
+  todosUsuarios: UsuarioResponseDto[] = []; // Armazena todos os usuários para filtragem local
   filtroForm: FormGroup;
 
-  // Estados
-  carregando = false;
   carregandoLista = false;
-  editando = false;
-  modoCadastro = false;
+  carregandoTodos = false;
+  filtrosAplicados = false;
+  mostrarInstrucoes = true;
+
+  usuarioAutenticado: UsuarioResponseDto | null = null;
   isAdmin = false;
 
   constructor(
     private usuarioService: UsuarioService,
-    public authService: AuthService,
-    public router: Router,
+    private authService: AuthService,
+    private router: Router,
     private fb: FormBuilder
   ) {
-    // Verificar autenticação
     this.usuarioAutenticado = this.authService.getUsuarioLogado();
     this.isAdmin = this.authService.isUserAdmin();
 
-    // Se estiver autenticado, define modoCadastro como false
-    this.modoCadastro = !this.authService.isAuthenticated();
-
-    // Formulário de CADASTRO (para não autenticados)
-    this.cadastroForm = this.fb.group({
-      matricula: ['', [Validators.required, Validators.maxLength(5), this.matriculaValidator]],
-      nomeCompleto: ['', [Validators.required, Validators.maxLength(100)]],
-      nomeUsuario: ['', [Validators.required]],
-      senha: ['', [Validators.required, Validators.minLength(7)]],
-      confirmarSenha: ['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email]],
-      lotacao: ['', [Validators.required]]
-    }, { validators: this.senhasCoincidemValidator });
-
-    // Formulário de PERFIL (para usuários autenticados)
-    this.perfilForm = this.fb.group({
-      nomeCompleto: [{ value: '', disabled: true }], // Não editável
-      nomeUsuario: [{ value: '', disabled: true }],  // Não editável
-      matricula: [{ value: '', disabled: true }],    // Não editável
-      email: ['', [Validators.required, Validators.email]],
-      lotacao: ['', [Validators.required]],
-      senhaAtual: [''], // Opcional para alteração
-      novaSenha: ['', [Validators.minLength(7)]],
-      confirmarNovaSenha: ['']
-    }, { validators: this.novasSenhasCoincidemValidator });
-
-    // Formulário para FILTROS (apenas admin)
+    // Formulário com todos os campos de filtro
     this.filtroForm = this.fb.group({
-      nomeCompleto: ['']
-    });
-
-    // Escuta mudanças nos filtros
-    this.filtroForm.valueChanges.subscribe(() => {
-      if (this.isAdmin) {
-        this.aplicarFiltros();
-      }
+      nomeCompleto: [''],
+      nomeUsuario: [''],
+      email: [''],
+      lotacao: ['']
     });
   }
 
   ngOnInit(): void {
-    if (this.authService.isAuthenticated()) {
-      this.carregarDadosPerfil();
-      if (this.isAdmin) {
-        this.carregarUsuarios();
-      }
-    }
-  }
-
-  // ========== MÉTODOS PARA NÃO AUTENTICADOS (CADASTRO) ==========
-
-  onSubmitCadastro(): void {
-    if (this.cadastroForm.invalid) {
-      this.marcarCamposComoSujos(this.cadastroForm);
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/login']);
       return;
     }
 
-    this.carregando = true;
-    const usuarioData: UsuarioRequestDto = {
-      matricula: this.cadastroForm.value.matricula,
-      nomeCompleto: this.cadastroForm.value.nomeCompleto,
-      nomeUsuario: this.cadastroForm.value.nomeUsuario,
-      senha: this.cadastroForm.value.senha,
-      email: this.cadastroForm.value.email,
-      lotacao: this.cadastroForm.value.lotacao
-    };
+    if (!this.isAdmin) {
+      // Se não for admin, redireciona para edição do próprio perfil
+      this.router.navigate(['/usuario/cadastro']);
+      return;
+    }
 
-    this.usuarioService.cadastrar(usuarioData).subscribe({
-      next: () => {
-        alert('Cadastro realizado com sucesso! Faça login para continuar.');
-        this.cadastroForm.reset();
-        this.carregando = false;
-        // Redireciona para login após cadastro bem-sucedido
-        this.router.navigate(['/login']);
-      },
-      error: (erro: HttpErrorResponse) => {
-        console.error('Erro ao cadastrar usuário:', erro);
-        alert(`Erro ao cadastrar usuário: ${erro.error?.message || erro.message}`);
-        this.carregando = false;
-      }
-    });
+    this.desabilitarCamposFiltro();
+    this.carregarTodosUsuarios(); // Carrega todos os usuários uma vez
+    this.mostrarInstrucoes = true;
+    this.filtrosAplicados = false;
   }
 
-  // ========== MÉTODOS PARA USUÁRIOS AUTENTICADOS ==========
+  // Carrega todos os usuários para filtragem local
+  carregarTodosUsuarios(): void {
+    this.carregandoTodos = true;
 
-  carregarDadosPerfil(): void {
-    if (this.usuarioAutenticado) {
-      this.perfilForm.patchValue({
-        nomeCompleto: this.usuarioAutenticado.nomeCompleto,
-        nomeUsuario: this.usuarioAutenticado.nomeUsuario,
-        matricula: this.usuarioAutenticado.matricula,
-        email: this.usuarioAutenticado.email,
-        lotacao: this.usuarioAutenticado.lotacao
+    setTimeout(() => {
+      this.usuarioService.buscarTodos().subscribe({
+        next: (usuarios) => {
+          this.todosUsuarios = usuarios;
+          this.carregandoTodos = false;
+          this.habilitarCamposFiltro();
+        },
+        error: (erro: HttpErrorResponse) => {
+          console.error('Erro ao carregar usuários:', erro);
+          alert('Erro ao carregar usuários');
+          this.carregandoTodos = false;
+          this.habilitarCamposFiltro();
+        }
       });
-    }
-  }
-
-  onSubmitPerfil(): void {
-    if (this.perfilForm.invalid) {
-      this.marcarCamposComoSujos(this.perfilForm);
-      return;
-    }
-
-    this.carregando = true;
-    const usuarioData: UsuarioRequestDto = {
-      id: this.usuarioAutenticado!.id,
-      nomeCompleto: this.usuarioAutenticado!.nomeCompleto, // Mantém o original
-      nomeUsuario: this.usuarioAutenticado!.nomeUsuario,   // Mantém o original
-      matricula: this.usuarioAutenticado!.matricula,       // Mantém o original
-      email: this.perfilForm.value.email,
-      lotacao: this.perfilForm.value.lotacao,
-      // Só envia senha se foi preenchida
-      senha: this.perfilForm.value.novaSenha || undefined
-    };
-
-    this.usuarioService.atualizar(this.usuarioAutenticado!.id, usuarioData).subscribe({
-      next: (usuarioAtualizado) => {
-        alert('Perfil atualizado com sucesso!');
-        // Atualiza os dados no auth service
-        this.authService.login(usuarioAtualizado);
-        this.usuarioAutenticado = usuarioAtualizado;
-        this.carregando = false;
-        this.perfilForm.patchValue({
-          senhaAtual: '',
-          novaSenha: '',
-          confirmarNovaSenha: ''
-        });
-      },
-      error: (erro: HttpErrorResponse) => {
-        console.error('Erro ao atualizar perfil:', erro);
-        alert(`Erro ao atualizar perfil: ${erro.error?.message || erro.message}`);
-        this.carregando = false;
-      }
-    });
-  }
-
-  // ========== MÉTODOS PARA ADMINISTRADORES ==========
-
-  carregarUsuarios(): void {
-    this.carregandoLista = true;
-
-    const filtros: FiltroUsuario = this.filtroForm.value;
-    if (!filtros.nomeCompleto) delete filtros.nomeCompleto;
-
-    this.usuarioService.buscar(filtros).subscribe({
-      next: (usuarios) => {
-        this.usuarios = usuarios;
-        this.carregandoLista = false;
-      },
-      error: (erro: HttpErrorResponse) => {
-        console.error('Erro ao carregar usuários:', erro);
-        alert('Erro ao carregar usuários');
-        this.carregandoLista = false;
-      }
-    });
+    }, 300);
   }
 
   aplicarFiltros(): void {
-    this.carregarUsuarios();
+    if (this.filtroForm.valid) {
+      this.carregarUsuarios();
+    }
+  }
+
+  carregarUsuarios(): void {
+    this.carregandoLista = true;
+    this.mostrarInstrucoes = false;
+    this.filtrosAplicados = true;
+    this.desabilitarCamposFiltro();
+
+    const filtros = this.filtroForm.value;
+    const filtrosBackend: FiltroUsuario = {};
+
+    // Apenas nomeCompleto será usado para busca no backend
+    if (filtros.nomeCompleto && filtros.nomeCompleto.trim() !== '') {
+      filtrosBackend.nomeCompleto = filtros.nomeCompleto.trim();
+    }
+
+    setTimeout(() => {
+      if (Object.keys(filtrosBackend).length > 0) {
+        // Se tem filtro no backend, busca com filtro
+        this.usuarioService.buscar(filtrosBackend).subscribe({
+          next: (usuarios) => {
+            // Aplica filtros adicionais no frontend
+            this.usuarios = this.aplicarFiltrosFrontend(usuarios, filtros);
+            this.carregandoLista = false;
+            this.habilitarCamposFiltro();
+          },
+          error: (erro: HttpErrorResponse) => {
+            console.error('Erro ao carregar usuários:', erro);
+            alert('Erro ao carregar usuários');
+            this.carregandoLista = false;
+            this.habilitarCamposFiltro();
+          }
+        });
+      } else {
+        // Se não tem filtro no backend, usa todos os usuários carregados
+        this.usuarios = this.aplicarFiltrosFrontend(this.todosUsuarios, filtros);
+        this.carregandoLista = false;
+        this.habilitarCamposFiltro();
+      }
+    }, 500);
+  }
+
+  // Aplica filtros adicionais no frontend
+  private aplicarFiltrosFrontend(usuarios: UsuarioResponseDto[], filtros: any): UsuarioResponseDto[] {
+    let resultado = [...usuarios]; // Cria uma cópia
+
+    if (filtros.nomeUsuario && filtros.nomeUsuario.trim() !== '') {
+      const busca = filtros.nomeUsuario.trim().toLowerCase();
+      resultado = resultado.filter(usuario =>
+        usuario.nomeUsuario.toLowerCase().includes(busca)
+      );
+    }
+
+    if (filtros.email && filtros.email.trim() !== '') {
+      const busca = filtros.email.trim().toLowerCase();
+      resultado = resultado.filter(usuario =>
+        usuario.email.toLowerCase().includes(busca)
+      );
+    }
+
+    if (filtros.lotacao && filtros.lotacao.trim() !== '') {
+      const busca = filtros.lotacao.trim().toLowerCase();
+      resultado = resultado.filter(usuario =>
+        usuario.lotacao.toLowerCase().includes(busca)
+      );
+    }
+
+    return resultado;
   }
 
   limparFiltros(): void {
+    this.desabilitarCamposFiltro();
     this.filtroForm.reset();
-    this.carregarUsuarios();
+    this.usuarios = [];
+    this.filtrosAplicados = false;
+    this.mostrarInstrucoes = true;
+
+    setTimeout(() => {
+      this.habilitarCamposFiltro();
+    }, 100);
   }
 
-  editarUsuario(usuario: UsuarioResponseDto): void {
-    this.editando = true;
-    this.usuarioEditando = usuario;
-    this.modoCadastro = true; // Muda para modo cadastro para edição
+  navegarParaCadastro(): void {
+    this.router.navigate(['/usuario/cadastro']);
+  }
 
-    this.cadastroForm.patchValue({
-      matricula: usuario.matricula,
-      nomeCompleto: usuario.nomeCompleto,
-      nomeUsuario: usuario.nomeUsuario,
-      senha: '', // Senha em branco para edição
-      confirmarSenha: '',
-      email: usuario.email,
-      lotacao: usuario.lotacao
-    });
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  navegarParaEdicao(id: number): void {
+    this.router.navigate(['/usuario/cadastro', id]);
   }
 
   deletarUsuario(id: number): void {
@@ -230,6 +183,9 @@ export class Usuario implements OnInit {
       this.usuarioService.deletar(id).subscribe({
         next: () => {
           alert('Usuário excluído com sucesso!');
+          // Atualiza a lista de todos os usuários
+          this.carregarTodosUsuarios();
+          // Reaplica os filtros atuais
           this.carregarUsuarios();
         },
         error: (erro: HttpErrorResponse) => {
@@ -240,45 +196,30 @@ export class Usuario implements OnInit {
     }
   }
 
-  cancelarEdicao(): void {
-    this.editando = false;
-    this.usuarioEditando = undefined;
-    this.modoCadastro = false;
-    this.cadastroForm.reset();
+  // Verifica se há algum filtro preenchido
+  temFiltrosPreenchidos(): boolean {
+    const values = this.filtroForm.value;
+    return Object.values(values).some(val =>
+      val !== null && val !== undefined && val !== ''
+    );
   }
 
-  novoUsuario(): void {
-    this.editando = false;
-    this.usuarioEditando = undefined;
-    this.modoCadastro = true;
-    this.cadastroForm.reset();
+  // Métodos para controle de campos
+  private desabilitarCamposFiltro(): void {
+    Object.keys(this.filtroForm.controls).forEach(key => {
+      const control = this.filtroForm.get(key);
+      if (control) {
+        control.disable();
+      }
+    });
   }
 
-  // ========== VALIDADORES ==========
-
-  private matriculaValidator(control: AbstractControl): ValidationErrors | null {
-    const matricula = control.value;
-    if (matricula && !/^\d+$/.test(matricula)) {
-      return { 'matriculaInvalida': true };
-    }
-    return null;
-  }
-
-  private senhasCoincidemValidator(group: AbstractControl): ValidationErrors | null {
-    const senha = group.get('senha')?.value;
-    const confirmarSenha = group.get('confirmarSenha')?.value;
-    return senha && confirmarSenha && senha !== confirmarSenha ? { 'senhasNaoCoincidem': true } : null;
-  }
-
-  private novasSenhasCoincidemValidator(group: AbstractControl): ValidationErrors | null {
-    const novaSenha = group.get('novaSenha')?.value;
-    const confirmarNovaSenha = group.get('confirmarNovaSenha')?.value;
-    return novaSenha && confirmarNovaSenha && novaSenha !== confirmarNovaSenha ? { 'novasSenhasNaoCoincidem': true } : null;
-  }
-
-  private marcarCamposComoSujos(formGroup: FormGroup): void {
-    Object.keys(formGroup.controls).forEach(key => {
-      formGroup.get(key)?.markAsTouched();
+  private habilitarCamposFiltro(): void {
+    Object.keys(this.filtroForm.controls).forEach(key => {
+      const control = this.filtroForm.get(key);
+      if (control && control.enabled === false) {
+        control.enable();
+      }
     });
   }
 }

@@ -1,0 +1,20 @@
+/* Estilo para item selecionado no menu */
+.menu-selecionado {
+  background-color: #d1d7e0 !important; /* Cinza mais escuro */
+  color: #333 !important; /* Borda lateral na cor do header */
+}
+
+.menu-selecionado i {
+  color: #5e87b0; /* Ícone na cor do header */
+}
+
+/* Hover nos itens do menu */
+.nav-link.text-dark:hover {
+  background-color: #e9ecef; /* Cinza claro no hover */
+  transition: background-color 0.2s ease;
+}
+
+/* Remove o estilo padrão do Bootstrap para active */
+.nav-pills .nav-link.active {
+  background-color: transparent !important;
+}

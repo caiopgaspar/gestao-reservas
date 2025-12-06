@@ -1,130 +1,116 @@
-<div class="container-fluid mt-3">
+<div class="container-fluid mt-0">
 
   <!-- CARD DE FILTROS -->
-  <div class="card mb-4">
-    <div class="card-header bg-light">
+  <div class="card mb-4 border-0">
+
+    <div class="card-header bg-transparent border-0">
+
       <div class="d-flex justify-content-between align-items-center">
+
         <h5 class="card-title mb-0">
-          <i class="bi bi-filter me-2"></i>
-          Filtros de Busca
+          Listagem de Recursos
         </h5>
 
-        <button
-          type="button"
-          class="btn btn-success btn-sm"
-          (click)="navegarParaCadastro()">
-          <i class="bi bi-plus-circle me-1"></i>
-          Novo Recurso
-        </button>
+        <div class="d-flex gap-2">
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            (click)="aplicarFiltros()">
+                <span *ngIf="!carregandoLista">
+                  <i class="bi bi-search me-1"></i>
+                  Filtrar
+                </span>
+            <span *ngIf="carregandoLista">
+                  <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                  Buscando...
+                </span>
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            (click)="navegarParaCadastro()">
+            <i class="bi bi-plus-square-fill me-1"></i>
+            Novo
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            (click)="limparFiltros()">
+            <i class="bi bi-eraser-fill me-1"></i>
+            Limpar
+          </button>
+        </div>
+
       </div>
+
     </div>
 
     <div class="card-body">
       <form [formGroup]="filtroForm">
         <div class="row g-3">
-
-          <!-- Nome -->
-          <div class="col-md-6">
-            <label for="nome" class="form-label">Nome do Recurso</label>
+          <!-- Campo Nome -->
+          <div class="d-flex align-items-center mb-0">
+            <label for="nome" class="form-label me-2" style="min-width: 120px; text-align: right">Nome:</label>
             <input
               type="text"
               id="nome"
               formControlName="nome"
               class="form-control"
+              style="width: 50%"
               placeholder="Digite parte do nome do recurso">
-            <div class="form-text">
-              Busca por nome (busca parcial, não é sensível a maiúsculas/minúsculas)
-            </div>
           </div>
 
-          <!-- Tipo -->
-          <div class="col-md-6">
-            <label for="tipoId" class="form-label">Tipo de Recurso</label>
+          <!-- Campo Tipo -->
+          <div class="d-flex align-items-center mb-1">
+            <label for="tipoId" class="form-label me-2" style="min-width: 120px; text-align: right">Tipo:</label>
+            <div style="width: 50%" class="position-relative">
+              <!-- Loading para tipos -->
+              <div *ngIf="carregandoTipos" class="position-absolute top-50 start-50 translate-middle">
+                <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                  <span class="visually-hidden">Carregando...</span>
+                </div>
+              </div>
 
-            <!-- Loading para tipos-->
-            <div *ngIf="carregandoTipos" class="alert alert-info py-2 mb-2">
-              <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-              Carregando tipos de recurso...
-            </div>
-
-            <select
-              id="tipoId"
-              formControlName="tipoId"
-              class="form-select">
-              <option value="">Todos os tipos</option>
-              <option *ngFor="let tipo of tiposRecurso" [value]="tipo.id">
-                {{ tipo.nome }}
-              </option>
-            </select>
-            <div class="form-text">
-              Selecione um tipo específico para filtrar
-            </div>
-          </div>
-
-          <!-- Botões de Ação -->
-          <div class="col-12">
-            <div class="d-flex justify-content-end gap-2 mt-3">
-              <button
-                type="button"
-                class="btn btn-outline-secondary"
-                (click)="limparFiltros()">
-                <i class="bi bi-x-circle me-1"></i>
-                Limpar
-              </button>
-
-              <button
-                type="button"
-                class="btn btn-primary"
-                (click)="aplicarFiltros()">
-                <span *ngIf="!carregandoLista">
-                  <i class="bi bi-search me-1"></i>
-                  Buscar
-                </span>
-                <span *ngIf="carregandoLista">
-                  <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                  Buscando...
-                </span>
-              </button>
+              <select
+                id="tipoId"
+                formControlName="tipoId"
+                class="form-select">
+                <option value="">Todos os tipos</option>
+                <option *ngFor="let tipo of tiposRecurso" [value]="tipo.id">
+                  {{ tipo.nome }}
+                </option>
+              </select>
             </div>
           </div>
-
         </div>
       </form>
     </div>
+
   </div>
 
+  <table class="table table-hover table-striped mt-o mb-0 p-0">
+    <thead class="table-light">
+    <tr>
+      <th style="width: 10%;">Código</th>
+      <th style="width: 30%;">Nome</th>
+      <th style="width: 15%;">Tipo</th>
+      <th style="width: 23%;">Localização</th>
+      <th style="width: 7%;">Capacidade</th>
+      <th style="width: 10%;" class="text-center">Ações</th>
+    </tr>
+    </thead>
+  </table>
+
   <!-- CARD DE RESULTADOS -->
-  <div class="card">
-    <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-      <h5 class="card-title mb-0">
-        <i class="bi bi-list-ul me-2"></i>
-        Recursos Encontrados
-      </h5>
+  <div class="card p-0 border-0 rounded-0">
 
-      <span class="badge bg-light text-dark" *ngIf="filtrosAplicados">
-        {{ recursos.length }} resultado(s)
-      </span>
-    </div>
-
-    <div class="card-body">
+    <div class="card-body p-0 border-0 rounded-0">
 
       <!-- INSTRUÇÕES INICIAIS -->
       <div *ngIf="mostrarInstrucoes && !carregandoLista" class="text-center py-5">
-        <div class="mb-4">
-          <i class="bi bi-search display-4 text-muted"></i>
-        </div>
-        <h5 class="text-muted mb-3">Buscar Recursos</h5>
-        <p class="text-muted mb-4">
-          Use os filtros acima para buscar recursos por nome ou tipo.<br>
-          Clique em "Buscar" para exibir os resultados.
-        </p>
-        <button
-          type="button"
-          class="btn btn-outline-primary"
-          (click)="carregarRecursos()">
-          <i class="bi bi-eye me-1"></i>
-          Mostrar Todos os Recursos
-        </button>
+        <h5 class="text-muted mb-3">Sem dados</h5>
       </div>
 
       <!-- LOADING -->
@@ -145,74 +131,50 @@
           Não foram encontrados recursos com os filtros aplicados.<br>
           Tente ajustar os critérios de busca ou cadastre um novo recurso.
         </p>
-        <button
-          type="button"
-          class="btn btn-outline-primary me-2"
-          (click)="limparFiltros()">
-          <i class="bi bi-filter me-1"></i>
-          Limpar Filtros
-        </button>
-        <button
-          type="button"
-          class="btn btn-success"
-          (click)="navegarParaCadastro()">
-          <i class="bi bi-plus-circle me-1"></i>
-          Cadastrar Novo Recurso
-        </button>
       </div>
 
       <!-- TABELA DE RESULTADOS -->
-      <div *ngIf="filtrosAplicados && !carregandoLista && recursos.length > 0" class="table-responsive">
+      <div *ngIf="filtrosAplicados && !carregandoLista && recursos.length > 0" class="table-responsive mt-0">
         <table class="table table-hover table-striped">
-          <thead class="table-dark">
-          <tr>
-            <th>Código</th>
-            <th>Nome</th>
-            <th>Tipo</th>
-            <th>Localização</th>
-            <th>Capacidade</th>
-            <th class="text-center" style="width: 120px;">Ações</th>
-          </tr>
-          </thead>
           <tbody>
           <tr *ngFor="let recurso of recursos">
-            <td>
-              <strong>{{ recurso.codigoIdentificacao }}</strong>
+            <td style="width: 10%">
+              <span>{{ recurso.codigoIdentificacao }}</span>
             </td>
-            <td>{{ recurso.nome }}</td>
-            <td>
-                <span class="badge bg-info text-dark">
-                  {{ recurso.nomeTipoRecurso }}
-                </span>
+            <td style="width: 30%">
+              <span>{{ recurso.nome }}</span>
             </td>
-            <td>
-                <span *ngIf="recurso.localizacao; else semLocalizacao">
-                  {{ recurso.localizacao }}
-                </span>
+            <td style="width: 15%">
+              <span>{{ recurso.nomeTipoRecurso }}</span>
+            </td>
+            <td style="width: 23%">
+              <span *ngIf="recurso.localizacao && recurso.localizacao.trim() !== ''; else semLocalizacao">
+                {{ recurso.localizacao }}
+              </span>
               <ng-template #semLocalizacao>
-                <span class="text-muted fst-italic">Não informado</span>
+                <span class="fst-italic">Não informado</span>
               </ng-template>
             </td>
-            <td>
-                <span *ngIf="recurso.capacidade; else semCapacidade">
-                  {{ recurso.capacidade }} pessoa(s)
-                </span>
+            <td style="width: 7%">
+              <span *ngIf="recurso.capacidade; else semCapacidade">
+                {{ recurso.capacidade }}
+              </span>
               <ng-template #semCapacidade>
-                <span class="text-muted fst-italic">Não informado</span>
+                <span class="fst-italic">-</span>
               </ng-template>
             </td>
-            <td class="text-center">
+            <td class="text-center" style="width: 10%">
               <div class="btn-group btn-group-sm" role="group">
                 <button
                   type="button"
-                  class="btn btn-warning"
+                  class="btn btn-outlined-light"
                   (click)="navegarParaEdicao(recurso.id)"
                   title="Editar Recurso">
                   <i class="bi bi-pencil"></i>
                 </button>
                 <button
                   type="button"
-                  class="btn btn-danger"
+                  class="btn btn-outlined-light"
                   (click)="deletarRecurso(recurso.id)"
                   title="Excluir Recurso">
                   <i class="bi bi-trash"></i>
@@ -224,9 +186,8 @@
         </table>
 
         <!-- Contador de resultados -->
-        <div class="mt-3 text-muted small">
-          <i class="bi bi-info-circle me-1"></i>
-          Exibindo {{ recursos.length }} recurso(s)
+        <div class="mt-3 text-muted fw-bold small">
+          {{ recursos.length }} Registro(s)
         </div>
       </div>
 

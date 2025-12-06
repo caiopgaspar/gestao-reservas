@@ -1,1 +1,442 @@
-<p>usuario-cadastro works!</p>
+<div class="container-fluid mt-3 border-0">
+
+  <!-- CARD DE CADASTRO/EDIÇÃO -->
+  <div class="card border-0">
+
+    <form [formGroup]="usuarioForm" (ngSubmit)="onSubmit()">
+
+      <div class="card-header bg-transparent border-0">
+
+        <div class="d-flex justify-content-between align-items-center">
+
+          <h5 class="card-title mb-0">
+            <i class="bi" [class.bi-person-plus]="!editando"
+               [class.bi-pencil]="editando && !editandoProprioPerfil"
+               [class.bi-person-gear]="editandoProprioPerfil"></i>
+            {{ editando ?
+            (editandoProprioPerfil ? 'Meu Perfil' :
+            (editandoOutroUsuario ? 'Editar Usuário' : 'Editar Meu Perfil')) :
+            'Cadastrar Novo Usuário' }}
+          </h5>
+
+          <div class="d-flex gap-2">
+
+            <button
+              type="submit"
+              class="btn btn-outline-secondary btn-sm"
+              [disabled]="usuarioForm.invalid || salvando || carregando">
+              <span *ngIf="!salvando">
+                <i class="bi bi-floppy2-fill me-1"></i>
+                {{ editando ?
+                   (editandoProprioPerfil ? 'Atualizar' : 'Atualizar') :
+                   'Cadastrar' }}
+              </span>
+              <span *ngIf="salvando">
+                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                {{ editando ? 'Atualizando...' : 'Salvando...' }}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-sm"
+              (click)="cancelar()">
+              <i class="bi bi-ban me-1"></i>
+              Cancelar
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-sm"
+              (click)="cancelar()">
+              <i class="bi bi-x-circle-fill me-1"></i>
+              Fechar
+            </button>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body">
+
+        <!-- Informação sobre quem está sendo editado -->
+        <div *ngIf="editandoOutroUsuario" class="alert alert-info mb-4">
+          <i class="bi bi-info-circle me-2"></i>
+          Você está editando um usuário como administrador. Pode modificar todos os campos.
+        </div>
+
+        <!-- Loading ao carregar dados para edição -->
+        <div *ngIf="carregando" class="alert alert-info mb-4">
+          <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+          Carregando dados do usuário...
+        </div>
+
+        <div class="mt-0 pt-3 border-top">
+
+          <!-- Seção para ADMIN (campos completos) -->
+          <div *ngIf="isAdmin">
+
+            <!-- Matrícula -->
+            <div class="row g-2 align-items-center mt-3">
+              <div class="col-2 text-end">
+                <label for="matricula" class="form-label mb-0">
+                  Matrícula: <span class="text-danger">*</span>
+                </label>
+              </div>
+
+              <div class="col-9">
+                <input
+                  type="text"
+                  id="matricula"
+                  formControlName="matricula"
+                  class="form-control form-control-sm"
+                  style="max-width: 70%"
+                  [class.is-invalid]="usuarioForm.get('matricula')?.invalid && usuarioForm.get('matricula')?.touched"
+                  [disabled]="carregando"
+                  placeholder="Ex: 12345"
+                  maxlength="5">
+
+                <div class="invalid-feedback" *ngIf="usuarioForm.get('matricula')?.errors?.['required']">
+                  Matrícula é obrigatória
+                </div>
+                <div class="invalid-feedback" *ngIf="usuarioForm.get('matricula')?.errors?.['maxlength']">
+                  Máximo 5 caracteres
+                </div>
+                <div class="invalid-feedback" *ngIf="usuarioForm.get('matricula')?.errors?.['matriculaInvalida']">
+                  Apenas números são permitidos
+                </div>
+              </div>
+            </div>
+
+            <!-- Nome Completo -->
+            <div class="row g-2 align-items-center mt-3">
+              <div class="col-2 text-end">
+                <label for="nomeCompleto" class="form-label mb-0">
+                  Nome: <span class="text-danger">*</span>
+                </label>
+              </div>
+
+              <div class="col-9">
+                <input
+                  type="text"
+                  id="nomeCompleto"
+                  formControlName="nomeCompleto"
+                  class="form-control form-control-sm"
+                  style="max-width: 70%"
+                  [class.is-invalid]="usuarioForm.get('nomeCompleto')?.invalid && usuarioForm.get('nomeCompleto')?.touched"
+                  [disabled]="carregando"
+                  placeholder="Digite o nome completo"
+                  maxlength="100">
+
+                <div class="invalid-feedback" *ngIf="usuarioForm.get('nomeCompleto')?.errors?.['required']">
+                  Nome completo é obrigatório
+                </div>
+              </div>
+            </div>
+
+            <!-- Nome de Usuário -->
+            <div class="row g-2 align-items-center mt-3">
+              <div class="col-2 text-end">
+                <label for="nomeUsuario" class="form-label mb-0">
+                  Usuário: <span class="text-danger">*</span>
+                </label>
+              </div>
+
+              <div class="col-9">
+                <input
+                  type="text"
+                  id="nomeUsuario"
+                  formControlName="nomeUsuario"
+                  class="form-control form-control-sm"
+                  style="max-width: 70%"
+                  [class.is-invalid]="usuarioForm.get('nomeUsuario')?.invalid && usuarioForm.get('nomeUsuario')?.touched"
+                  [disabled]="carregando"
+                  placeholder="Nome para login">
+
+                <div class="invalid-feedback" *ngIf="usuarioForm.get('nomeUsuario')?.errors?.['required']">
+                  Nome de usuário é obrigatório
+                </div>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="row g-2 align-items-center mt-3">
+              <div class="col-2 text-end">
+                <label for="email" class="form-label mb-0">
+                  E-mail: <span class="text-danger">*</span>
+                </label>
+              </div>
+
+              <div class="col-9">
+                <input
+                  type="email"
+                  id="email"
+                  formControlName="email"
+                  class="form-control form-control-sm"
+                  style="max-width: 70%"
+                  [class.is-invalid]="usuarioForm.get('email')?.invalid && usuarioForm.get('email')?.touched"
+                  [disabled]="carregando"
+                  placeholder="exemplo@email.com">
+
+                <div class="invalid-feedback" *ngIf="usuarioForm.get('email')?.errors?.['required']">
+                  E-mail é obrigatório
+                </div>
+                <div class="invalid-feedback" *ngIf="usuarioForm.get('email')?.errors?.['email']">
+                  Formato de e-mail inválido
+                </div>
+              </div>
+            </div>
+
+            <!-- Lotação -->
+            <div class="row g-2 align-items-center mt-3">
+              <div class="col-2 text-end">
+                <label for="lotacao" class="form-label mb-0">
+                  Lotação: <span class="text-danger">*</span>
+                </label>
+              </div>
+
+              <div class="col-9">
+                <input
+                  type="text"
+                  id="lotacao"
+                  formControlName="lotacao"
+                  class="form-control form-control-sm"
+                  style="max-width: 70%"
+                  [class.is-invalid]="usuarioForm.get('lotacao')?.invalid && usuarioForm.get('lotacao')?.touched"
+                  [disabled]="carregando"
+                  placeholder="Departamento ou setor">
+
+                <div class="invalid-feedback" *ngIf="usuarioForm.get('lotacao')?.errors?.['required']">
+                  Lotação é obrigatória
+                </div>
+              </div>
+            </div>
+
+            <!-- Senha -->
+            <div class="row g-2 align-items-center mt-3">
+              <div class="col-2 text-end">
+                <label for="senha" class="form-label mb-0">
+                  Senha: <span *ngIf="!editando" class="text-danger">*</span>
+                </label>
+              </div>
+
+              <div class="col-9">
+                <input
+                  type="password"
+                  id="senha"
+                  formControlName="senha"
+                  class="form-control form-control-sm"
+                  style="max-width: 70%"
+                  [class.is-invalid]="usuarioForm.get('senha')?.invalid && usuarioForm.get('senha')?.touched"
+                  [disabled]="carregando"
+                  [placeholder]="editando ? 'Deixe em branco para manter' : 'Mínimo 7 caracteres'"
+                  minlength="7">
+
+                <div class="invalid-feedback" *ngIf="usuarioForm.get('senha')?.errors?.['required'] && !editando">
+                  Senha é obrigatória para novo cadastro
+                </div>
+                <div class="invalid-feedback" *ngIf="usuarioForm.get('senha')?.errors?.['minlength']">
+                  Mínimo 7 caracteres
+                </div>
+              </div>
+            </div>
+
+            <!-- Confirmar Senha -->
+            <div class="row g-2 align-items-center mt-3">
+              <div class="col-2 text-end">
+                <label for="confirmarSenha" class="form-label mb-0">
+                  Confirmar: <span *ngIf="usuarioForm.get('senha')?.value" class="text-danger">*</span>
+                </label>
+              </div>
+
+              <div class="col-9">
+                <input
+                  type="password"
+                  id="confirmarSenha"
+                  formControlName="confirmarSenha"
+                  class="form-control form-control-sm"
+                  style="max-width: 70%"
+                  [class.is-invalid]="(usuarioForm.get('confirmarSenha')?.invalid && usuarioForm.get('confirmarSenha')?.touched) || usuarioForm.errors?.['senhasNaoCoincidem']"
+                  [disabled]="carregando"
+                  placeholder="Digite a senha novamente">
+
+                <div class="invalid-feedback" *ngIf="usuarioForm.get('confirmarSenha')?.errors?.['required'] && usuarioForm.get('senha')?.value">
+                  Confirmação de senha é obrigatória
+                </div>
+                <div class="invalid-feedback" *ngIf="usuarioForm.errors?.['senhasNaoCoincidem']">
+                  As senhas não coincidem
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Seção para USUÁRIO COMUM -->
+          <div *ngIf="!isAdmin">
+
+            <!-- Informação sobre dados não editáveis -->
+            <div class="alert alert-info mb-4">
+              <i class="bi bi-info-circle me-2"></i>
+              Apenas e-mail, lotação e senha podem ser alterados. Contate o administrador para alterar outros dados.
+            </div>
+
+            <!-- Dados não editáveis -->
+            <div class="row g-2 align-items-center mt-3">
+              <div class="col-2 text-end">
+                <label class="form-label mb-0">Matrícula:</label>
+              </div>
+              <div class="col-9">
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  style="max-width: 70%"
+                  [value]="usuarioForm.get('matricula')?.value"
+                  readonly
+                  disabled>
+              </div>
+            </div>
+
+            <div class="row g-2 align-items-center mt-3">
+              <div class="col-2 text-end">
+                <label class="form-label mb-0">Nome:</label>
+              </div>
+              <div class="col-9">
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  style="max-width: 70%"
+                  [value]="usuarioForm.get('nomeCompleto')?.value"
+                  readonly
+                  disabled>
+              </div>
+            </div>
+
+            <div class="row g-2 align-items-center mt-3">
+              <div class="col-2 text-end">
+                <label class="form-label mb-0">Usuário:</label>
+              </div>
+              <div class="col-9">
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  style="max-width: 70%"
+                  [value]="usuarioForm.get('nomeUsuario')?.value"
+                  readonly
+                  disabled>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="row g-2 align-items-center mt-3">
+              <div class="col-2 text-end">
+                <label for="emailComum" class="form-label mb-0">
+                  E-mail: <span class="text-danger">*</span>
+                </label>
+              </div>
+
+              <div class="col-9">
+                <input
+                  type="email"
+                  id="emailComum"
+                  formControlName="email"
+                  class="form-control form-control-sm"
+                  style="max-width: 70%"
+                  [class.is-invalid]="usuarioForm.get('email')?.invalid && usuarioForm.get('email')?.touched"
+                  [disabled]="carregando"
+                  placeholder="exemplo@email.com">
+
+                <div class="invalid-feedback" *ngIf="usuarioForm.get('email')?.errors?.['required']">
+                  E-mail é obrigatório
+                </div>
+                <div class="invalid-feedback" *ngIf="usuarioForm.get('email')?.errors?.['email']">
+                  Formato de e-mail inválido
+                </div>
+              </div>
+            </div>
+
+            <!-- Lotação -->
+            <div class="row g-2 align-items-center mt-3">
+              <div class="col-2 text-end">
+                <label for="lotacaoComum" class="form-label mb-0">
+                  Lotação: <span class="text-danger">*</span>
+                </label>
+              </div>
+
+              <div class="col-9">
+                <input
+                  type="text"
+                  id="lotacaoComum"
+                  formControlName="lotacao"
+                  class="form-control form-control-sm"
+                  style="max-width: 70%"
+                  [class.is-invalid]="usuarioForm.get('lotacao')?.invalid && usuarioForm.get('lotacao')?.touched"
+                  [disabled]="carregando"
+                  placeholder="Departamento ou setor">
+
+                <div class="invalid-feedback" *ngIf="usuarioForm.get('lotacao')?.errors?.['required']">
+                  Lotação é obrigatória
+                </div>
+              </div>
+            </div>
+
+            <!-- Nova Senha -->
+            <div class="row g-2 align-items-center mt-3">
+              <div class="col-2 text-end">
+                <label for="novaSenha" class="form-label mb-0">
+                  Nova Senha:
+                </label>
+              </div>
+
+              <div class="col-9">
+                <input
+                  type="password"
+                  id="novaSenha"
+                  formControlName="novaSenha"
+                  class="form-control form-control-sm"
+                  style="max-width: 70%"
+                  [class.is-invalid]="usuarioForm.get('novaSenha')?.invalid && usuarioForm.get('novaSenha')?.touched"
+                  [disabled]="carregando"
+                  placeholder="Deixe em branco para manter a atual"
+                  minlength="7">
+
+                <div class="invalid-feedback" *ngIf="usuarioForm.get('novaSenha')?.errors?.['minlength']">
+                  Mínimo 7 caracteres
+                </div>
+              </div>
+            </div>
+
+            <!-- Confirmar Nova Senha -->
+            <div class="row g-2 align-items-center mt-0">
+              <div class="col-2 text-end">
+                <label for="confirmarNovaSenha" class="form-label mb-0">
+                  Confirmar:
+                </label>
+              </div>
+
+              <div class="col-9">
+                <input
+                  type="password"
+                  id="confirmarNovaSenha"
+                  formControlName="confirmarNovaSenha"
+                  class="form-control form-control-sm"
+                  style="max-width: 70%"
+                  [class.is-invalid]="(usuarioForm.get('confirmarNovaSenha')?.invalid && usuarioForm.get('confirmarNovaSenha')?.touched) || usuarioForm.errors?.['novasSenhasNaoCoincidem']"
+                  [disabled]="carregando"
+                  placeholder="Confirme a nova senha">
+
+                <div class="invalid-feedback" *ngIf="usuarioForm.errors?.['novasSenhasNaoCoincidem']">
+                  As novas senhas não coincidem
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </form>
+
+  </div>
+</div>

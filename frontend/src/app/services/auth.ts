@@ -7,9 +7,7 @@ export interface AuthResponse {
   usuario?: UsuarioResponseDto;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
   private usuarioLogado = signal<UsuarioResponseDto | null>(null);
   private isAdmin = signal<boolean>(false);

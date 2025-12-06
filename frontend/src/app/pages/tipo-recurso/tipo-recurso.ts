@@ -37,9 +37,14 @@ export class TipoRecurso implements OnInit {
   }
 
   ngOnInit(): void {
-    // Inicialmente não carrega tipos - espera usuário aplicar filtros
+    this.desabilitarCampoNome();
+
     this.mostrarInstrucoes = true;
     this.filtrosAplicados = false;
+
+    setTimeout(() => {
+      this.habilitarCampoNome();
+    }, 100);
   }
 
   carregarTiposRecurso(): void {
@@ -47,9 +52,10 @@ export class TipoRecurso implements OnInit {
     this.mostrarInstrucoes = false;
     this.filtrosAplicados = true;
 
+    this.desabilitarCamposFiltro();
+
     const filtros = this.filtroForm.value;
 
-    // Remove valores vazios/nulos
     const filtrosLimpos: any = {};
     if (filtros.nome && filtros.nome.trim() !== '') {
       filtrosLimpos.nome = filtros.nome.trim();
@@ -57,28 +63,32 @@ export class TipoRecurso implements OnInit {
 
     console.log('Buscando tipos de recurso com filtros:', filtrosLimpos);
 
-    // Como seu backend não tem endpoint com filtros, vamos buscar todos e filtrar no frontend
-    this.tipoRecursoService.buscarTodos().subscribe({
-      next: (tipos) => {
-        // Filtra no frontend se houver nome no filtro
-        if (filtrosLimpos.nome) {
-          const nomeBusca = filtrosLimpos.nome.toLowerCase();
-          this.tiposRecurso = tipos.filter(tipo =>
-            tipo.nome.toLowerCase().includes(nomeBusca)
-          );
-        } else {
-          this.tiposRecurso = tipos;
-        }
+    setTimeout(() => {
+      this.tipoRecursoService.buscarTodos().subscribe({
+        next: (tipos) => {
+          if (filtrosLimpos.nome) {
+            const nomeBusca = filtrosLimpos.nome.toLowerCase();
+            this.tiposRecurso = tipos.filter(tipo =>
+              tipo.nome.toLowerCase().includes(nomeBusca)
+            );
+          } else {
+            this.tiposRecurso = tipos;
+          }
 
-        this.carregandoLista = false;
-        console.log(`${this.tiposRecurso.length} tipos de recurso encontrados`);
-      },
-      error: (erro: HttpErrorResponse) => {
-        console.error('Erro ao carregar tipos de recurso:', erro);
-        alert('Erro ao carregar tipos de recurso');
-        this.carregandoLista = false;
-      }
-    });
+          this.carregandoLista = false;
+          console.log(`${this.tiposRecurso.length} tipos de recurso encontrados`);
+
+          this.habilitarCamposFiltro();
+        },
+        error: (erro: HttpErrorResponse) => {
+          console.error('Erro ao carregar tipos de recurso:', erro);
+          alert('Erro ao carregar tipos de recurso');
+          this.carregandoLista = false;
+
+          this.habilitarCamposFiltro();
+        }
+      });
+    }, 500); // 500ms de delay
   }
 
   aplicarFiltros(): void {
@@ -88,10 +98,16 @@ export class TipoRecurso implements OnInit {
   }
 
   limparFiltros(): void {
+    this.desabilitarCamposFiltro();
+
     this.filtroForm.reset();
     this.tiposRecurso = [];
     this.filtrosAplicados = false;
     this.mostrarInstrucoes = true;
+
+    setTimeout(() => {
+      this.habilitarCamposFiltro();
+    }, 100);
   }
 
   navegarParaCadastro(): void {
@@ -102,6 +118,10 @@ export class TipoRecurso implements OnInit {
     this.router.navigate(['/tipo-recurso/cadastro', id]);
   }
 
+  navegarParaInicio(): void {
+    this.router.navigate(['/index']);
+  }
+
   deletarTipoRecurso(id: number): void {
     if (!confirm('Tem certeza que deseja excluir este tipo de recurso?')) {
       return;
@@ -110,7 +130,7 @@ export class TipoRecurso implements OnInit {
     this.tipoRecursoService.deletar(id).subscribe({
       next: () => {
         alert('Tipo de recurso excluído com sucesso!');
-        // Recarrega os dados mantendo os filtros atuais
+
         this.carregarTiposRecurso();
       },
       error: (erro: HttpErrorResponse) => {
@@ -118,7 +138,6 @@ export class TipoRecurso implements OnInit {
 
         let mensagemErro = 'Erro ao excluir tipo de recurso';
 
-        // ✅ Mensagens de erro mais específicas
         if (erro.status === 400) {
           mensagemErro = 'Dados inválidos.';
         } else if (erro.status === 409) {
@@ -134,7 +153,6 @@ export class TipoRecurso implements OnInit {
     });
   }
 
-  // Verifica se há algum filtro preenchido
   temFiltrosPreenchidos(): boolean {
     const values = this.filtroForm.value;
     return Object.values(values).some(val =>
@@ -142,10 +160,43 @@ export class TipoRecurso implements OnInit {
     );
   }
 
-  // Se quiser implementar edição inline (sem mudar de página)
   editarTipoRecurso(tipo: TipoRecursoInterface): void {
-    // Aqui você pode implementar edição inline se preferir
-    // Ou usar o método navegarParaEdicao(tipo.id!)
     this.navegarParaEdicao(tipo.id!);
   }
+
+
+  // Métodos para controle de campos
+
+  private desabilitarCampoNome(): void {
+    const nomeControl = this.filtroForm.get('nome');
+    if (nomeControl) {
+      nomeControl.disable();
+    }
+  }
+
+  private habilitarCampoNome(): void {
+    const nomeControl = this.filtroForm.get('nome');
+    if (nomeControl && nomeControl.enabled === false) {
+      nomeControl.enable();
+    }
+  }
+
+  private desabilitarCamposFiltro(): void {
+    Object.keys(this.filtroForm.controls).forEach(key => {
+      const control = this.filtroForm.get(key);
+      if (control) {
+        control.disable();
+      }
+    });
+  }
+
+  private habilitarCamposFiltro(): void {
+    Object.keys(this.filtroForm.controls).forEach(key => {
+      const control = this.filtroForm.get(key);
+      if (control && control.enabled === false) {
+        control.enable();
+      }
+    });
+  }
+
 }

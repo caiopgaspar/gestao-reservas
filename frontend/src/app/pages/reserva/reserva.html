@@ -1,295 +1,221 @@
-<div class="container-fluid">
-  <!-- Card de Cadastro/Edição -->
-  <div class="card mb-4">
-    <div class="card-header bg-primary text-white">
-      <h5 class="card-title mb-0">
-        <i class="bi bi-calendar-plus me-2"></i>
-        {{ editando ? 'Editar Reserva' : 'Nova Reserva' }}
-      </h5>
-    </div>
-    <div class="card-body">
-      <form [formGroup]="reservaForm" (ngSubmit)="onSubmit()">
-        <div class="row">
-          <!-- Data/Hora Início - ATUALIZADO COM VALIDAÇÕES -->
-          <div class="col-md-6 mb-3">
-            <label for="dataHoraInicio" class="form-label">Data e Hora de Início <span class="text-danger">*</span></label>
-            <input
-              id="dataHoraInicio"
-              type="datetime-local"
-              formControlName="dataHoraInicio"
-              class="form-control"
-              [class.is-invalid]="(reservaForm.get('dataHoraInicio')?.invalid && reservaForm.get('dataHoraInicio')?.touched) || reservaForm.errors?.['dataNoPassado']">
+<div class="container-fluid mt-0">
 
-            <div class="invalid-feedback" *ngIf="reservaForm.get('dataHoraInicio')?.errors?.['required'] && reservaForm.get('dataHoraInicio')?.touched">
-              Data e hora de início são obrigatórias
-            </div>
-            <div class="invalid-feedback" *ngIf="reservaForm.errors?.['dataNoPassado']">
-              A data de início não pode ser no passado
-            </div>
-          </div>
+  <!-- CARD DE FILTROS -->
+  <div class="card mb-4 border-0">
 
-          <!-- Data/Hora Fim - ATUALIZADO COM VALIDAÇÕES -->
-          <div class="col-md-6 mb-3">
-            <label for="dataHoraFim" class="form-label">Data e Hora de Término <span class="text-danger">*</span></label>
-            <input
-              id="dataHoraFim"
-              type="datetime-local"
-              formControlName="dataHoraFim"
-              class="form-control"
-              [class.is-invalid]="(reservaForm.get('dataHoraFim')?.invalid && reservaForm.get('dataHoraFim')?.touched) || reservaForm.errors?.['dataFimAnterior']">
+    <div class="card-header bg-transparent border-0">
 
-            <div class="invalid-feedback" *ngIf="reservaForm.get('dataHoraFim')?.errors?.['required'] && reservaForm.get('dataHoraFim')?.touched">
-              Data e hora de término são obrigatórias
-            </div>
-            <div class="invalid-feedback" *ngIf="reservaForm.errors?.['dataFimAnterior']">
-              A data de término deve ser posterior à data de início
-            </div>
-          </div>
+      <div class="d-flex justify-content-between align-items-center">
+
+        <h5 class="card-title mb-0">
+          Listagem de Reservas
+        </h5>
+
+        <div class="d-flex gap-2">
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            (click)="aplicarFiltros()"
+            [disabled]="carregandoLista">
+                <span *ngIf="!carregandoLista">
+                  <i class="bi bi-search me-1"></i>
+                  Filtrar
+                </span>
+            <span *ngIf="carregandoLista">
+                  <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                  Buscando...
+                </span>
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            (click)="navegarParaCadastro()">
+            <i class="bi bi-plus-square-fill me-1"></i>
+            Nova
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            (click)="limparFiltros()"
+            [disabled]="carregandoLista || (!temFiltrosPreenchidos() && !filtrosAplicados)">
+            <i class="bi bi-eraser-fill me-1"></i>
+            Limpar
+          </button>
         </div>
 
-        <div class="row">
-          <!-- Recurso -->
-          <div class="col-md-6 mb-3">
-            <label for="recursoId" class="form-label">Recurso <span class="text-danger">*</span></label>
-            <select
-              id="recursoId"
-              formControlName="recursoId"
-              class="form-select"
-              [class.is-invalid]="reservaForm.get('recursoId')?.invalid && reservaForm.get('recursoId')?.touched">
-              <option value="">Selecione um recurso...</option>
-              <option *ngFor="let recurso of recursos" [value]="recurso.id">
-                {{ recurso.codigoIdentificacao }} - {{ recurso.nome }}
-              </option>
-            </select>
-            <div class="invalid-feedback">
-              Selecione um recurso
+      </div>
+
+    </div>
+
+    <div class="card-body">
+      <form [formGroup]="filtroForm">
+        <div class="row g-3">
+          <!-- Campo Recurso -->
+          <div class="d-flex align-items-center mb-0">
+            <label for="recursoId" class="form-label me-3" style="min-width: 120px; text-align: right">Recurso:</label>
+            <div style="width: 35%" class="position-relative">
+              <!-- Loading para recursos -->
+              <div *ngIf="carregandoRecursos" class="position-absolute top-50 start-50 translate-middle">
+                <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                  <span class="visually-hidden">Carregando...</span>
+                </div>
+              </div>
+
+              <select
+                id="recursoId"
+                formControlName="recursoId"
+                class="form-select"
+                [disabled]="carregandoRecursos">
+                <option value="">Todos os recursos</option>
+                <option *ngFor="let recurso of recursos" [value]="recurso.id">
+                  {{ recurso.codigoIdentificacao }} - {{ recurso.nome }}
+                </option>
+              </select>
             </div>
           </div>
 
-          <!-- Usuário -->
-          <div class="col-md-6 mb-3">
-            <label for="usuarioId" class="form-label">Usuário <span class="text-danger">*</span></label>
-
-            <!-- Para administradores: select de usuários -->
-            <div *ngIf="isAdmin">
-              <div *ngIf="carregandoUsuarios" class="alert alert-info py-2">
-                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                Carregando usuários...
+          <!-- Campo Usuário (apenas para admin) -->
+          <div class="d-flex align-items-center mb-0" *ngIf="isAdmin">
+            <label for="usuarioId" class="form-label me-3" style="min-width: 120px; text-align: right">Usuário:</label>
+            <div style="width: 35%" class="position-relative">
+              <!-- Loading para usuários -->
+              <div *ngIf="carregandoUsuarios" class="position-absolute top-50 start-50 translate-middle">
+                <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                  <span class="visually-hidden">Carregando...</span>
+                </div>
               </div>
 
               <select
                 id="usuarioId"
                 formControlName="usuarioId"
                 class="form-select"
-                [class.is-invalid]="reservaForm.get('usuarioId')?.invalid && reservaForm.get('usuarioId')?.touched"
                 [disabled]="carregandoUsuarios">
-                <option value="">Selecione um usuário...</option>
+                <option value="">Todos os usuários</option>
                 <option *ngFor="let usuario of usuarios" [value]="usuario.id">
                   {{ usuario.matricula }} - {{ usuario.nomeCompleto }}
                 </option>
               </select>
             </div>
-
-            <!-- Para usuários normais: campo fixo -->
-            <div *ngIf="!isAdmin">
-              <input
-                type="text"
-                class="form-control"
-                [value]="usuarioLogado?.nomeCompleto || 'Usuário não identificado'"
-                disabled
-                placeholder="Seu usuário">
-              <div class="form-text">
-                Reserva será feita para: {{ usuarioLogado?.nomeCompleto || 'Usuário não identificado' }}
-                <span *ngIf="usuarioLogado">({{ usuarioLogado.matricula }})</span>
-              </div>
-              <input type="hidden" formControlName="usuarioId">
-            </div>
-
-            <div class="invalid-feedback">
-              Selecione um usuário
-            </div>
-          </div>
-        </div>
-
-        <!-- Finalidade -->
-        <div class="row">
-          <div class="col-12 mb-3">
-            <label for="finalidade" class="form-label">Finalidade</label>
-            <textarea
-              id="finalidade"
-              formControlName="finalidade"
-              class="form-control"
-              rows="3"
-              placeholder="Descreva a finalidade da reserva (opcional)"
-              maxlength="150"></textarea>
-            <div class="form-text">
-              {{ reservaForm.get('finalidade')?.value?.length || 0 }}/150 caracteres
-            </div>
-          </div>
-        </div>
-
-        <!-- Botões -->
-        <div class="row">
-          <div class="col-12">
-            <button
-              type="submit"
-              class="btn btn-success me-2"
-              [disabled]="reservaForm.invalid || carregando">
-              <span *ngIf="!carregando">
-                <i class="bi" [class.bi-check-lg]="!editando" [class.bi-pencil]="editando"></i>
-                {{ editando ? 'Atualizar' : 'Reservar' }}
-              </span>
-              <span *ngIf="carregando">
-                <span class="spinner-border spinner-border-sm" role="status"></span>
-                Processando...
-              </span>
-            </button>
-
-            <button
-              *ngIf="editando"
-              type="button"
-              class="btn btn-secondary"
-              (click)="cancelarEdicao()"
-              [disabled]="carregando">
-              <i class="bi bi-x-circle"></i> Cancelar
-            </button>
           </div>
         </div>
       </form>
     </div>
+
   </div>
 
-  <!-- Card de Listagem -->
-  <div class="card">
-    <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-      <h5 class="card-title mb-0">
-        <i class="bi bi-list-ul me-2"></i>
-        Reservas {{ !isAdmin ? 'do Usuário' : '' }}
-      </h5>
+  <table class="table table-hover table-striped mt-o mb-0 p-0">
+    <thead class="table-light">
+    <tr>
+      <th style="width: 20%;">Recurso</th>
+      <th *ngIf="isAdmin" style="width: 20%;">Usuário</th>
+      <th style="width: 15%;">Início</th>
+      <th style="width: 15%;">Término</th>
+      <th style="width: 10%;">Status</th>
+      <th style="width: 10%;" class="text-center">Ações</th>
+    </tr>
+    </thead>
+  </table>
 
-      <!-- Filtros -->
-      <div class="d-flex gap-2" [formGroup]="filtroForm">
-        <!-- Filtro por recurso (disponível para todos) -->
-        <select
-          class="form-select form-select-sm"
-          style="width: 200px;"
-          formControlName="recursoId">
-          <option value="">Todos os recursos</option>
-          <option *ngFor="let recurso of recursos" [value]="recurso.id">
-            {{ recurso.nome }}
-          </option>
-        </select>
+  <!-- CARD DE RESULTADOS -->
+  <div class="card p-0 border-0 rounded-0">
 
-        <!-- Filtro por usuário (apenas para admin) -->
-        <select
-          *ngIf="isAdmin"
-          class="form-select form-select-sm"
-          style="width: 200px;"
-          formControlName="usuarioId"
-          [disabled]="carregandoUsuarios">
-          <option value="">Todos os usuários</option>
-          <option *ngFor="let usuario of usuarios" [value]="usuario.id">
-            {{ usuario.nomeCompleto }}
-          </option>
-        </select>
+    <div class="card-body p-0 border-0 rounded-0">
 
-        <button
-          type="button"
-          class="btn btn-outline-light btn-sm"
-          (click)="limparFiltros()"
-          title="Limpar filtros">
-          <i class="bi bi-x-circle"></i>
-        </button>
+      <!-- INSTRUÇÕES INICIAIS -->
+      <div *ngIf="mostrarInstrucoes && !carregandoLista" class="text-center py-5">
+        <h5 class="text-muted mb-3">Sem dados</h5>
       </div>
-    </div>
 
-    <div class="card-body">
-      <!-- Loading -->
-      <div *ngIf="carregandoLista" class="text-center py-3">
+      <!-- LOADING -->
+      <div *ngIf="carregandoLista" class="text-center py-5">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Carregando...</span>
         </div>
-        <p class="mt-2 mb-0">Carregando reservas...</p>
+        <p class="mt-3 text-muted">Buscando reservas...</p>
       </div>
 
-      <!-- Lista Vazia -->
-      <div *ngIf="!carregandoLista && reservas.length === 0" class="text-center py-4">
-        <i class="bi bi-calendar-x display-4 text-muted"></i>
-        <h5 class="text-muted mt-3">Nenhuma reserva encontrada</h5>
-        <p class="text-muted">Use o formulário acima para criar uma nova reserva.</p>
+      <!-- NENHUM RESULTADO (após busca) -->
+      <div *ngIf="filtrosAplicados && !carregandoLista && reservas.length === 0" class="text-center py-5">
+        <div class="mb-4">
+          <i class="bi bi-calendar-x display-4 text-muted"></i>
+        </div>
+        <h5 class="text-muted mb-3">Nenhuma reserva encontrada</h5>
+        <p class="text-muted mb-4">
+          Não foram encontradas reservas com os filtros aplicados.<br>
+          Tente ajustar os critérios de busca ou crie uma nova reserva.
+        </p>
       </div>
 
-      <!-- Tabela de Reservas -->
-      <div *ngIf="!carregandoLista && reservas.length > 0" class="table-responsive">
-        <table class="table table-striped table-hover">
-          <thead class="table-dark">
-          <tr>
-            <th scope="col">Recurso</th>
-            <th scope="col" *ngIf="isAdmin">Usuário</th>
-            <th scope="col">Início</th>
-            <th scope="col">Término</th>
-            <th scope="col">Status</th>
-            <th scope="col" class="text-center" style="width: 150px;">Ações</th>
-          </tr>
-          </thead>
+      <!-- TABELA DE RESULTADOS -->
+      <div *ngIf="filtrosAplicados && !carregandoLista && reservas.length > 0" class="table-responsive mt-0">
+        <table class="table table-hover table-striped">
           <tbody>
           <tr *ngFor="let reserva of reservas">
-            <td>
+            <td style="width: 20%">
               <div>
                 <strong>{{ reserva.codigoRecurso }}</strong>
                 <br>
-                <small class="text-muted">{{ reserva.nomeRecurso }}</small>
+                <small>{{ reserva.nomeRecurso }}</small>
               </div>
             </td>
-            <td *ngIf="isAdmin">
+            <td *ngIf="isAdmin" style="width: 20%">
               <div>
                 <strong>{{ reserva.nomeCompleto }}</strong>
                 <br>
-                <small class="text-muted">{{ reserva.matriculaUsuario }}</small>
+                <small>{{ reserva.matriculaUsuario }}</small>
               </div>
             </td>
-            <td>{{ formatarDataHora(reserva.dataHoraInicio) }}</td>
-            <td>{{ formatarDataHora(reserva.dataHoraFim) }}</td>
-            <td>
-                <span class="badge" [class]="getBadgeClass(reserva.status)">
-                  {{ reserva.status }}
-                </span>
+            <td style="width: 15%">
+              <span>{{ formatarDataHora(reserva.dataHoraInicio) }}</span>
             </td>
-            <td class="text-center">
-              <button
-                class="btn btn-warning btn-sm me-1"
-                (click)="editarReserva(reserva)"
-                title="Editar reserva"
-                [disabled]="!isAdmin && reserva.usuarioId !== usuarioLogado?.id">
-                <i class="bi bi-pencil"></i>
-              </button>
-              <button
-                *ngIf="reserva.status === statusReserva.PENDENTE || reserva.status === statusReserva.CONFIRMADA"
-                class="btn btn-danger btn-sm me-1"
-                (click)="cancelarReserva(reserva.id)"
-                title="Cancelar reserva"
-                [disabled]="!isAdmin && reserva.usuarioId !== usuarioLogado?.id">
-                <i class="bi bi-x-circle"></i>
-              </button>
-              <button
-                class="btn btn-danger btn-sm"
-                (click)="deletarReserva(reserva.id)"
-                title="Excluir reserva"
-                [disabled]="!isAdmin && reserva.usuarioId !== usuarioLogado?.id">
-                <i class="bi bi-trash"></i>
-              </button>
+            <td style="width: 15%">
+              <span>{{ formatarDataHora(reserva.dataHoraFim) }}</span>
+            </td>
+            <td style="width: 10%">
+              <span class="badge" [class]="getBadgeClass(reserva.status)">
+                {{ reserva.status }}
+              </span>
+            </td>
+            <td class="text-center" style="width: 10%">
+              <div class="btn-group btn-group-sm" role="group">
+                <button
+                  type="button"
+                  class="btn btn-outlined-light"
+                  (click)="navegarParaEdicao(reserva.id)"
+                  title="Editar Reserva">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button
+                  *ngIf="reserva.status === statusReserva.PENDENTE || reserva.status === statusReserva.CONFIRMADA"
+                  type="button"
+                  class="btn btn-outlined-light"
+                  (click)="cancelarReserva(reserva.id)"
+                  title="Cancelar Reserva">
+                  <i class="bi bi-x-circle"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outlined-light"
+                  (click)="deletarReserva(reserva.id)"
+                  title="Excluir Reserva">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
             </td>
           </tr>
           </tbody>
         </table>
+
+        <!-- Contador de resultados -->
+        <div class="mt-3 text-muted fw-bold small">
+          {{ reservas.length }} Registro(s)
+          <span *ngIf="!isAdmin && usuarioLogado"> para {{ usuarioLogado.nomeCompleto }}</span>
+        </div>
       </div>
 
-      <!-- Contador de resultados -->
-      <div *ngIf="reservas.length > 0" class="mt-3 text-muted small">
-        <i class="bi bi-info-circle"></i>
-        {{ reservas.length }} reserva(s) encontrada(s)
-        <span *ngIf="!isAdmin && usuarioLogado">para {{ usuarioLogado.nomeCompleto }}</span>
-      </div>
     </div>
   </div>
+
 </div>
