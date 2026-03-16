@@ -21,6 +21,17 @@ export class AppComponent {
       private router: Router
     ) {}
 
+    get primeiroNome(): string {
+        const usuario = this.authService.getUsuarioLogado();
+
+        if (usuario) {
+          const nomeParaExibir = usuario['nomeCompleto'] || usuario.nomeUsuario || '';
+
+          return nomeParaExibir.split(' ')[0];
+        }
+        return 'Usuário';
+    }
+
     onLogout(): void {
       this.authService.logout();
       this.router.navigate(['/login']);
@@ -29,6 +40,5 @@ export class AppComponent {
   toggleSidebar() {
       this.sidebarExpanded = !this.sidebarExpanded;
   }
-
 
 }

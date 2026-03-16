@@ -11,6 +11,8 @@ public interface IReservaService {
     Reserva buscarPorId (Long id);
 
     List<Reserva> buscarTodas();
+    
+    List<Reserva> buscarComFiltros(Long usuarioId, Long recursoId);
 
     List<Reserva> buscarReservaPorUsuario(Long usuarioId);
 

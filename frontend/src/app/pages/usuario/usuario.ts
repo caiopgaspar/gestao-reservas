@@ -178,6 +178,10 @@ export class Usuario implements OnInit {
     this.router.navigate(['/usuario/cadastro', id]);
   }
 
+  navegarParaInicio(): void {
+      this.router.navigate(['/index']);
+  }
+
   deletarUsuario(id: number): void {
     if (confirm('Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.')) {
       this.usuarioService.deletar(id).subscribe({

@@ -12,64 +12,59 @@ export class AuthService {
   private usuarioLogado = signal<UsuarioResponseDto | null>(null);
   private isAdmin = signal<boolean>(false);
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+    this.carregarDoLocalStorage();
+  }
 
-  // Método para verificar se está no navegador
   private isBrowser(): boolean {
     return isPlatformBrowser(this.platformId);
   }
 
-  // Método para fazer login
+  private carregarDoLocalStorage(): void {
+      if (this.isBrowser()) {
+        const savedUser = localStorage.getItem('usuarioLogado');
+        const savedAdmin = localStorage.getItem('isAdmin');
+
+        if (savedUser) {
+          try {
+            this.usuarioLogado.set(JSON.parse(savedUser));
+          } catch (e) {
+            console.error('Erro ao recuperar usuário:', e);
+          }
+        }
+
+        if (savedAdmin) {
+          try {
+            this.isAdmin.set(JSON.parse(savedAdmin));
+          } catch (e) {
+            console.error('Erro ao recuperar admin:', e);
+          }
+        }
+      }
+  }
+
   login(usuario: UsuarioResponseDto): void {
     this.usuarioLogado.set(usuario);
 
-    // Lógica para determinar se é admin baseado no nome de usuário
+    // Lógica para determinar se é admin baseado no nome de usuário TODO: alterar para roles
     const adminUsers = ['admin', 'administrador', 'gestor'];
-    const isUserAdmin = adminUsers.includes(usuario.nomeUsuario.toLowerCase());
+    const nome = usuario.nomeUsuario ? usuario.nomeUsuario.toLowerCase() : '';
+    const isUserAdmin = adminUsers.includes(nome);
+
     this.isAdmin.set(isUserAdmin);
 
-    // Salvar no localStorage apenas se estiver no navegador
     if (this.isBrowser()) {
       localStorage.setItem('usuarioLogado', JSON.stringify(usuario));
       localStorage.setItem('isAdmin', JSON.stringify(isUserAdmin));
     }
   }
 
-  // Método para obter o usuário logado
   getUsuarioLogado(): UsuarioResponseDto | null {
-    if (!this.usuarioLogado()) {
-      // Tentar recuperar do localStorage apenas se estiver no navegador
-      if (this.isBrowser()) {
-        const saved = localStorage.getItem('usuarioLogado');
-        if (saved) {
-          try {
-            this.usuarioLogado.set(JSON.parse(saved));
-          } catch (e) {
-            console.error('Erro ao recuperar usuário do localStorage:', e);
-            this.logout();
-          }
-        }
-      }
-    }
     return this.usuarioLogado();
   }
 
   // Verificar se é admin
   isUserAdmin(): boolean {
-    if (!this.isAdmin()) {
-      // Tentar recuperar do localStorage apenas se estiver no navegador
-      if (this.isBrowser()) {
-        const saved = localStorage.getItem('isAdmin');
-        if (saved) {
-          try {
-            this.isAdmin.set(JSON.parse(saved));
-          } catch (e) {
-            console.error('Erro ao recuperar status admin do localStorage:', e);
-            return false;
-          }
-        }
-      }
-    }
     return this.isAdmin();
   }
 
@@ -83,7 +78,6 @@ export class AuthService {
     this.usuarioLogado.set(null);
     this.isAdmin.set(false);
 
-    // Limpar localStorage apenas se estiver no navegador
     if (this.isBrowser()) {
       localStorage.removeItem('usuarioLogado');
       localStorage.removeItem('isAdmin');

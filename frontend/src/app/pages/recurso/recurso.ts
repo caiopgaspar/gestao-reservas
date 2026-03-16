@@ -129,6 +129,10 @@ export class Recurso implements OnInit {
     this.router.navigate(['/recurso/cadastro', id]);
   }
 
+  navegarParaInicio(): void {
+      this.router.navigate(['/index']);
+  }
+
   deletarRecurso(id: number): void {
     if (confirm('Tem certeza que deseja excluir este recurso? Esta ação não pode ser desfeita.')) {
       this.recursoService.deletar(id).subscribe({

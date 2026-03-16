@@ -25,6 +25,15 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
             @Param("idReservaAtual") Long idReservaAtual
             );
 
+    @Query("SELECT r FROM Reserva r WHERE " +
+            "(:usuarioId IS NULL OR r.usuario.id = :usuarioId) AND " +
+            "(:recursoId IS NULL OR r.recurso.id = :recursoId) " +
+            "ORDER BY r.dataHoraInicio ASC")
+    List<Reserva> buscarPorFiltros(
+            @Param("usuarioId") Long usuarioId,
+            @Param("recursoId") Long recursoId
+            );
+
     List<Reserva> findByUsuarioIdOrderByDataHoraInicioAsc(Long usuarioId);
 
     List<Reserva> findByRecursoIdOrderByDataHoraInicioAsc(Long recursoId);

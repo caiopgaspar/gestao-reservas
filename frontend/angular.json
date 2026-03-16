@@ -47,7 +47,8 @@
               }
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "node_modules/devextreme/dist/css/dx.light.css"
             ],
             "server": "src/main.server.ts",
             "outputMode": "server",

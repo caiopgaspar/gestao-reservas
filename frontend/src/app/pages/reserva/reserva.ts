@@ -118,11 +118,12 @@ export class Reserva implements OnInit {
 
     const filtros: FiltroReserva = this.filtroForm.value;
 
+    this.desabilitarCamposFiltro();
+
     if (!this.isAdmin && this.usuarioLogado) {
       filtros.usuarioId = this.usuarioLogado.id;
     }
 
-    // Remove valores vazios
     if (!filtros.usuarioId) delete filtros.usuarioId;
     if (!filtros.recursoId) delete filtros.recursoId;
 
@@ -168,6 +169,10 @@ export class Reserva implements OnInit {
 
   navegarParaEdicao(id: number): void {
     this.router.navigate(['/reserva/cadastro', id]);
+  }
+
+  navegarParaInicio(): void {
+      this.router.navigate(['/index']);
   }
 
   cancelarReserva(id: number): void {

@@ -37,18 +37,11 @@ public class ReservaController {
             @RequestParam(required = false) Long usuarioId,
             @RequestParam(required = false) Long recursoId
     ){
-        List<Reserva> reservas;
-
-        if(usuarioId != null){
-            reservas = reservaService.buscarReservaPorUsuario(usuarioId);
-        } else if (recursoId != null){
-            reservas = reservaService.buscarReservasPorRecurso((recursoId));
-        } else {
-            reservas = reservaService.buscarTodas();
-        }
+        List<Reserva> reservas = reservaService.buscarComFiltros(usuarioId, recursoId);
 
         List<ReservaResponseDto> responseList = reservas.stream()
-                .map(ReservaResponseDto::new).collect(Collectors.toList());
+                .map(ReservaResponseDto::new)
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok(responseList);
     }

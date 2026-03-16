@@ -38,6 +38,11 @@ public class ReservaService implements IReservaService{
     }
 
     @Override
+    public List<Reserva> buscarComFiltros(Long usuarioId, Long recursoId) {
+        return reservaRepository.buscarPorFiltros(usuarioId, recursoId);
+    }
+
+    @Override
     public List<Reserva> buscarReservaPorUsuario(Long usuarioId) {
         return reservaRepository.findByUsuarioIdOrderByDataHoraInicioAsc(usuarioId);
     }
