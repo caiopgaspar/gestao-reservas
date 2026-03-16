@@ -41,3 +41,24 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Java/Maven/Gradle build outputs
+target/
+build/
+bin/
+*.class
+*.jar
+*.war
+*.ear
+
+# Ignorar pastas de dependências e build em qualquer subpasta
+**/node_modules/
+**/target/
+**/\${project.build.directory}/
+**/.angular/
+
+# Outros arquivos comuns
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
