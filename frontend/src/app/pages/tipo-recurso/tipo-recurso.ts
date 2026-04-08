@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { TipoRecurso as TipoRecursoInterface, TipoRecursoService } from '../../services/tipo-recurso';
+import { BarraAcoes } from '../barra-acoes/barra-acoes';
 
 @Component({
   selector: 'app-tipo-recurso',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, BarraAcoes],
   templateUrl: './tipo-recurso.html',
   styleUrls: ['./tipo-recurso.css']
 })

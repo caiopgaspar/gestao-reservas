@@ -25,7 +25,7 @@ export const routes: Routes = [
   { path: 'recurso/cadastro/:id', component: RecursoCadastro },
 
   { path: 'usuario', component: Usuario,canActivate: [AuthGuard] },
-  { path: 'usuario/cadastro', component: UsuarioCadastro, canActivate: [AuthGuard] },
+  { path: 'usuario/cadastro', component: UsuarioCadastro },
   { path: 'usuario/cadastro/:id', component: UsuarioCadastro, canActivate: [AuthGuard] },
 
   { path: 'reserva', component: Reserva },

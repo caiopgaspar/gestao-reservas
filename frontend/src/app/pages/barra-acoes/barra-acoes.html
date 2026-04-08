@@ -1,1 +1,50 @@
-<p>barra-acoes works!</p>
+<div class="card-header bg-transparent border-0">
+  <div class="d-flex justify-content-between align-items-center">
+    <h5 class="card-title mb-0">
+      {{ titulo }}
+    </h5>
+
+    <div class="d-flex gap-2">
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm"
+        (click)="onFiltrar()"
+        [disabled]="desabilitarFiltrar || carregandoFiltrar">
+        <span *ngIf="!carregandoFiltrar">
+          <i class="bi bi-search me-1"></i>
+          {{ textoFiltrar }}
+        </span>
+        <span *ngIf="carregandoFiltrar">
+          <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+          Buscando...
+        </span>
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm"
+        (click)="onNovo()"
+        [disabled]="desabilitarNovo">
+        <i class="bi {{ iconBotaoNovo }} me-1"></i>
+        {{ textoBotaoNovo }}
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm"
+        (click)="onLimpar()"
+        [disabled]="desabilitarLimpar">
+        <i class="bi bi-eraser-fill me-1"></i>
+        {{ textoLimpar }}
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm"
+        (click)="onFechar()">
+        <i class="bi bi-x-circle-fill me-1"></i>
+        {{ textoFechar }}
+      </button>
+    </div>
+  </div>
+</div>

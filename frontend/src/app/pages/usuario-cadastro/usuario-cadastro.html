@@ -73,8 +73,8 @@
 
         <div class="mt-0 pt-3 border-top">
 
-          <!-- Seção para ADMIN (campos completos) -->
-          <div *ngIf="isAdmin">
+          <!-- Seção para ADMIN ou NOVO USUÁRIO NÃO AUTENTICADO (campos completos) -->
+          <div *ngIf="isAdmin || (!editando && !isAdmin)">
 
             <!-- Matrícula -->
             <div class="row g-2 align-items-center mt-3">
@@ -92,7 +92,7 @@
                   class="form-control form-control-sm"
                   style="max-width: 70%"
                   [class.is-invalid]="usuarioForm.get('matricula')?.invalid && usuarioForm.get('matricula')?.touched"
-                  [disabled]="carregando"
+                  [attr.disabled]="carregando ? true : null"
                   placeholder="Ex: 12345"
                   maxlength="5">
 
@@ -124,7 +124,7 @@
                   class="form-control form-control-sm"
                   style="max-width: 70%"
                   [class.is-invalid]="usuarioForm.get('nomeCompleto')?.invalid && usuarioForm.get('nomeCompleto')?.touched"
-                  [disabled]="carregando"
+                  [attr.disabled]="carregando ? true : null"
                   placeholder="Digite o nome completo"
                   maxlength="100">
 
@@ -150,7 +150,7 @@
                   class="form-control form-control-sm"
                   style="max-width: 70%"
                   [class.is-invalid]="usuarioForm.get('nomeUsuario')?.invalid && usuarioForm.get('nomeUsuario')?.touched"
-                  [disabled]="carregando"
+                  [attr.disabled]="carregando ? true : null"
                   placeholder="Nome para login">
 
                 <div class="invalid-feedback" *ngIf="usuarioForm.get('nomeUsuario')?.errors?.['required']">
@@ -175,7 +175,7 @@
                   class="form-control form-control-sm"
                   style="max-width: 70%"
                   [class.is-invalid]="usuarioForm.get('email')?.invalid && usuarioForm.get('email')?.touched"
-                  [disabled]="carregando"
+                  [attr.disabled]="carregando ? true : null"
                   placeholder="exemplo@email.com">
 
                 <div class="invalid-feedback" *ngIf="usuarioForm.get('email')?.errors?.['required']">
@@ -203,7 +203,7 @@
                   class="form-control form-control-sm"
                   style="max-width: 70%"
                   [class.is-invalid]="usuarioForm.get('lotacao')?.invalid && usuarioForm.get('lotacao')?.touched"
-                  [disabled]="carregando"
+                  [attr.disabled]="carregando ? true : null"
                   placeholder="Departamento ou setor">
 
                 <div class="invalid-feedback" *ngIf="usuarioForm.get('lotacao')?.errors?.['required']">
@@ -228,7 +228,7 @@
                   class="form-control form-control-sm"
                   style="max-width: 70%"
                   [class.is-invalid]="usuarioForm.get('senha')?.invalid && usuarioForm.get('senha')?.touched"
-                  [disabled]="carregando"
+                  [attr.disabled]="carregando ? true : null"
                   [placeholder]="editando ? 'Deixe em branco para manter' : 'Mínimo 7 caracteres'"
                   minlength="7">
 
@@ -257,7 +257,7 @@
                   class="form-control form-control-sm"
                   style="max-width: 70%"
                   [class.is-invalid]="(usuarioForm.get('confirmarSenha')?.invalid && usuarioForm.get('confirmarSenha')?.touched) || usuarioForm.errors?.['senhasNaoCoincidem']"
-                  [disabled]="carregando"
+                  [attr.disabled]="carregando ? true : null"
                   placeholder="Digite a senha novamente">
 
                 <div class="invalid-feedback" *ngIf="usuarioForm.get('confirmarSenha')?.errors?.['required'] && usuarioForm.get('senha')?.value">
@@ -271,8 +271,8 @@
 
           </div>
 
-          <!-- Seção para USUÁRIO COMUM -->
-          <div *ngIf="!isAdmin">
+          <!-- Seção para USUÁRIO COMUM AUTENTICADO EDITANDO -->
+          <div *ngIf="!isAdmin && editando">
 
             <!-- Informação sobre dados não editáveis -->
             <div class="alert alert-info mb-4">
@@ -342,7 +342,7 @@
                   class="form-control form-control-sm"
                   style="max-width: 70%"
                   [class.is-invalid]="usuarioForm.get('email')?.invalid && usuarioForm.get('email')?.touched"
-                  [disabled]="carregando"
+                  [attr.disabled]="carregando ? true : null"
                   placeholder="exemplo@email.com">
 
                 <div class="invalid-feedback" *ngIf="usuarioForm.get('email')?.errors?.['required']">
@@ -370,7 +370,7 @@
                   class="form-control form-control-sm"
                   style="max-width: 70%"
                   [class.is-invalid]="usuarioForm.get('lotacao')?.invalid && usuarioForm.get('lotacao')?.touched"
-                  [disabled]="carregando"
+                  [attr.disabled]="carregando ? true : null"
                   placeholder="Departamento ou setor">
 
                 <div class="invalid-feedback" *ngIf="usuarioForm.get('lotacao')?.errors?.['required']">
@@ -395,7 +395,7 @@
                   class="form-control form-control-sm"
                   style="max-width: 70%"
                   [class.is-invalid]="usuarioForm.get('novaSenha')?.invalid && usuarioForm.get('novaSenha')?.touched"
-                  [disabled]="carregando"
+                  [attr.disabled]="carregando ? true : null"
                   placeholder="Deixe em branco para manter a atual"
                   minlength="7">
 
@@ -421,7 +421,7 @@
                   class="form-control form-control-sm"
                   style="max-width: 70%"
                   [class.is-invalid]="(usuarioForm.get('confirmarNovaSenha')?.invalid && usuarioForm.get('confirmarNovaSenha')?.touched) || usuarioForm.errors?.['novasSenhasNaoCoincidem']"
-                  [disabled]="carregando"
+                  [attr.disabled]="carregando ? true : null"
                   placeholder="Confirme a nova senha">
 
                 <div class="invalid-feedback" *ngIf="usuarioForm.errors?.['novasSenhasNaoCoincidem']">

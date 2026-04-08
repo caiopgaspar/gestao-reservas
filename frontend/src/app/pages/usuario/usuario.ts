@@ -5,11 +5,12 @@ import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { UsuarioService, UsuarioResponseDto, FiltroUsuario } from '../../services/usuario';
 import { AuthService } from '../../services/auth';
+import { BarraAcoes } from '../barra-acoes/barra-acoes';
 
 @Component({
   selector: 'app-usuario',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, BarraAcoes],
   templateUrl: './usuario.html',
   styleUrls: ['./usuario.css']
 })

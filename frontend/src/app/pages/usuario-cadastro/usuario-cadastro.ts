@@ -15,7 +15,7 @@ import { AuthService } from '../../services/auth';
 })
 export class UsuarioCadastro implements OnInit {
 
-  usuarioForm: FormGroup;
+  usuarioForm!: FormGroup;
 
   salvando = false;
   carregando = false;
@@ -37,39 +37,78 @@ export class UsuarioCadastro implements OnInit {
     this.usuarioAutenticado = this.authService.getUsuarioLogado();
     this.isAdmin = this.authService.isUserAdmin();
 
-    // Se não estiver autenticado, redireciona para login
-    if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/usuario']);
-    }
+        const id = this.route.snapshot.params['id'];
+
+        // Se NÃO tem ID (está criando novo usuário)
+        if (!id) {
+          // Se não é admin E não está autenticado (novo usuário comum)
+          if (!this.isAdmin && !this.authService.isAuthenticated()) {
+          }
+          // Se está tentando criar novo usuário mas não é admin e está autenticado (usuário comum)
+          else if (!this.isAdmin && this.authService.isAuthenticated()) {
+            // Redireciona usuário comum para seu próprio perfil
+            this.router.navigate([`/usuario/${this.usuarioAutenticado?.id}`]);
+            return;
+          }
+        }
+        else {
+          // Se não está autenticado, redireciona para login
+          if (!this.authService.isAuthenticated()) {
+            this.router.navigate(['/login']);
+            return;
+          }
+
+          // Se não é admin e está tentando editar outro usuário
+          if (!this.isAdmin && +id !== this.usuarioAutenticado?.id) {
+            // Redireciona para seu próprio perfil
+            this.router.navigate([`/usuario/${this.usuarioAutenticado?.id}`]);
+            return;
+          }
+        }
 
     // Inicializar formulário vazio, será configurado no ngOnInit
     this.usuarioForm = this.fb.group({});
   }
 
+
   ngOnInit(): void {
-    // Desabilitar todos os campos inicialmente (será habilitado após carregamento)
+    // Inicializar formulário primeiro
     this.initializeForm();
+
+    // Desabilitar todos os campos inicialmente
     this.desabilitarTodosCampos();
 
     // Verificar se é edição de outro usuário (admin) ou próprio perfil
     const id = this.route.snapshot.params['id'];
 
     if (id) {
+      // CASO COM ID - Editando
       this.editando = true;
       this.usuarioId = +id;
       this.editandoProprioPerfil = (this.usuarioId === this.usuarioAutenticado?.id);
       this.editandoOutroUsuario = this.isAdmin && !this.editandoProprioPerfil;
       this.carregarUsuarioParaEdicao();
+
     } else {
-      // Se não tem ID, está criando novo usuário (apenas admin)
-      if (!this.isAdmin) {
-        // Usuário comum editando próprio perfil
+      // CASO SEM ID - Criando novo usuário
+      this.editando = false;
+
+      // Se é admin criando novo usuário
+      if (this.isAdmin) {
+        setTimeout(() => {
+          this.habilitarTodosCampos();
+        }, 100);
+      }
+      // Se é usuário comum autenticado (deveria estar editando, mas foi para rota errada)
+      else if (this.authService.isAuthenticated() && this.usuarioAutenticado) {
         this.editando = true;
-        this.usuarioId = this.usuarioAutenticado!.id;
+        this.usuarioId = this.usuarioAutenticado.id;
         this.editandoProprioPerfil = true;
         this.carregarUsuarioParaEdicao();
-      } else {
-        // Admin criando novo usuário - habilitar campos após inicializar
+      }
+      // Se é novo usuário não autenticado (cadastro público)
+      else {
+        // Já temos o formulário com campos habilitados, só precisamos ativar
         setTimeout(() => {
           this.habilitarTodosCampos();
         }, 100);
@@ -78,28 +117,47 @@ export class UsuarioCadastro implements OnInit {
   }
 
   private initializeForm(): void {
+    const id = this.route.snapshot.params['id'];
+
     if (this.isAdmin) {
-      // Formulário completo para admin (pode editar todos os campos)
+      // ADMIN - formulário completo (sempre habilitado para criação/edição)
       this.usuarioForm = this.fb.group({
         matricula: ['', [Validators.required, Validators.maxLength(5), this.matriculaValidator]],
         nomeCompleto: ['', [Validators.required, Validators.maxLength(100)]],
         nomeUsuario: ['', [Validators.required]],
         email: ['', [Validators.required, Validators.email]],
         lotacao: ['', [Validators.required]],
-        senha: ['', [Validators.minLength(7)]],
+        senha: ['', id ? [Validators.minLength(7)] : [Validators.required, Validators.minLength(7)]],
         confirmarSenha: ['']
       }, { validators: this.senhasCoincidemValidator });
+
     } else {
-      // Formulário limitado para usuário comum
-      this.usuarioForm = this.fb.group({
-        matricula: [{ value: '', disabled: true }],
-        nomeCompleto: [{ value: '', disabled: true }],
-        nomeUsuario: [{ value: '', disabled: true }],
-        email: ['', [Validators.required, Validators.email]],
-        lotacao: ['', [Validators.required]],
-        novaSenha: ['', [Validators.minLength(7)]],
-        confirmarNovaSenha: ['']
-      }, { validators: this.novasSenhasCoincidemValidator });
+      // NÃO É ADMIN
+
+      if (id) {
+        // CASO 1: Editando um usuário (com ID) - usuário comum editando próprio perfil
+        this.usuarioForm = this.fb.group({
+          matricula: [{ value: '', disabled: true }],
+          nomeCompleto: [{ value: '', disabled: true }],
+          nomeUsuario: [{ value: '', disabled: true }],
+          email: ['', [Validators.required, Validators.email]],
+          lotacao: ['', [Validators.required]],
+          novaSenha: ['', [Validators.minLength(7)]],
+          confirmarNovaSenha: ['']
+        }, { validators: this.novasSenhasCoincidemValidator });
+
+      } else {
+        // CASO 2: NOVO USUÁRIO NÃO AUTENTICADO (cadastro público) - TODOS OS CAMPOS HABILITADOS
+        this.usuarioForm = this.fb.group({
+          matricula: ['', [Validators.required, Validators.maxLength(5), this.matriculaValidator]],
+          nomeCompleto: ['', [Validators.required, Validators.maxLength(100)]],
+          nomeUsuario: ['', [Validators.required]],
+          email: ['', [Validators.required, Validators.email]],
+          lotacao: ['', [Validators.required]],
+          senha: ['', [Validators.required, Validators.minLength(7)]],
+          confirmarSenha: ['']
+        }, { validators: this.senhasCoincidemValidator });
+      }
     }
   }
 
@@ -156,8 +214,8 @@ export class UsuarioCadastro implements OnInit {
     this.salvando = true;
     this.desabilitarTodosCampos();
 
+    // CASO 1: Admin criando/atualizando
     if (this.isAdmin) {
-      // Admin criando/atualizando usuário (todos os campos)
       const usuarioData: UsuarioRequestDto = {
         matricula: this.usuarioForm.value.matricula,
         nomeCompleto: this.usuarioForm.value.nomeCompleto,
@@ -167,7 +225,6 @@ export class UsuarioCadastro implements OnInit {
         senha: this.usuarioForm.value.senha || undefined
       };
 
-      // Se for edição, adiciona o ID
       if (this.editando && this.usuarioId) {
         usuarioData.id = this.usuarioId;
       }
@@ -180,7 +237,6 @@ export class UsuarioCadastro implements OnInit {
         next: (usuarioSalvo) => {
           let mensagemSucesso = `Usuário ${this.editando ? 'atualizado' : 'cadastrado'} com sucesso!`;
 
-          // Se admin estiver editando próprio perfil, atualiza sessão
           if (this.editandoProprioPerfil) {
             this.authService.login(usuarioSalvo);
             mensagemSucesso = 'Seu perfil foi atualizado com sucesso!';
@@ -193,19 +249,20 @@ export class UsuarioCadastro implements OnInit {
           this.tratarErro(erro);
         }
       });
-    } else {
-      // Usuário comum atualizando próprio perfil
+    }
+    // CASO 2: Usuário comum autenticado atualizando próprio perfil
+    else if (this.authService.isAuthenticated() && this.usuarioAutenticado) {
       const usuarioData: UsuarioRequestDto = {
-        id: this.usuarioAutenticado!.id,
-        nomeCompleto: this.usuarioAutenticado!.nomeCompleto,
-        nomeUsuario: this.usuarioAutenticado!.nomeUsuario,
-        matricula: this.usuarioAutenticado!.matricula,
+        id: this.usuarioAutenticado.id,
+        nomeCompleto: this.usuarioAutenticado.nomeCompleto,
+        nomeUsuario: this.usuarioAutenticado.nomeUsuario,
+        matricula: this.usuarioAutenticado.matricula,
         email: this.usuarioForm.value.email,
         lotacao: this.usuarioForm.value.lotacao,
         senha: this.usuarioForm.value.novaSenha || undefined
       };
 
-      this.usuarioService.atualizar(this.usuarioAutenticado!.id, usuarioData).subscribe({
+      this.usuarioService.atualizar(this.usuarioAutenticado.id, usuarioData).subscribe({
         next: (usuarioAtualizado) => {
           alert('Perfil atualizado com sucesso!');
           this.authService.login(usuarioAtualizado);
@@ -215,6 +272,27 @@ export class UsuarioCadastro implements OnInit {
           });
           this.salvando = false;
           this.habilitarTodosCampos();
+        },
+        error: (erro: HttpErrorResponse) => {
+          this.tratarErro(erro);
+        }
+      });
+    }
+    // CASO 3: NOVO USUÁRIO NÃO AUTENTICADO (cadastro público)
+    else {
+      const usuarioData: UsuarioRequestDto = {
+        matricula: this.usuarioForm.value.matricula,
+        nomeCompleto: this.usuarioForm.value.nomeCompleto,
+        nomeUsuario: this.usuarioForm.value.nomeUsuario,
+        email: this.usuarioForm.value.email,
+        lotacao: this.usuarioForm.value.lotacao,
+        senha: this.usuarioForm.value.senha
+      };
+
+      this.usuarioService.cadastrar(usuarioData).subscribe({
+        next: (usuarioSalvo) => {
+          alert('Cadastro realizado com sucesso! Faça login para continuar.');
+          this.router.navigate(['/login']);
         },
         error: (erro: HttpErrorResponse) => {
           this.tratarErro(erro);
@@ -284,14 +362,14 @@ export class UsuarioCadastro implements OnInit {
   private habilitarTodosCampos(): void {
     Object.keys(this.usuarioForm.controls).forEach(key => {
       const control = this.usuarioForm.get(key);
-      if (control && control.enabled === false) {
-        // Para usuário comum, mantém campos de identificação desabilitados
-        if (!this.isAdmin && ['matricula', 'nomeCompleto', 'nomeUsuario'].includes(key)) {
-          control.enable(); // Habilita mas mantém readonly
-          control.disable(); // Marca como disabled
-          return;
+      if (control) {
+        // Para usuário comum editando próprio perfil, mantém campos de identificação desabilitados
+        if (!this.isAdmin && this.editando && ['matricula', 'nomeCompleto', 'nomeUsuario'].includes(key)) {
+          // Mantém desabilitado
+          control.disable();
+        } else {
+          control.enable();
         }
-        control.enable();
       }
     });
   }

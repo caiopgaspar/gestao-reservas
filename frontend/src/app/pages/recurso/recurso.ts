@@ -6,11 +6,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { RecursoService, RecursoResponseDto } from '../../services/recurso';
 import { TipoRecursoService, TipoRecurso } from '../../services/tipo-recurso';
+import { BarraAcoes } from '../barra-acoes/barra-acoes';
 
 @Component({
   selector: 'app-recurso',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, BarraAcoes],
   templateUrl: './recurso.html',
   styleUrls: ['./recurso.css']
 })

@@ -3,60 +3,16 @@
   <!-- CARD DE FILTROS -->
   <div class="card mb-4 border-0">
 
-    <div class="card-header bg-transparent border-0">
-
-      <div class="d-flex justify-content-between align-items-center">
-
-        <h5 class="card-title mb-0">
-          Listagem de Usuários
-        </h5>
-
-        <div class="d-flex gap-2">
-          <button
-            type="button"
-            class="btn btn-outline-secondary btn-sm"
-            (click)="aplicarFiltros()"
-            [disabled]="carregandoLista || carregandoTodos">
-                <span *ngIf="!carregandoLista">
-                  <i class="bi bi-search me-1"></i>
-                  Filtrar
-                </span>
-            <span *ngIf="carregandoLista">
-                  <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                  Buscando...
-                </span>
-          </button>
-
-          <button
-            type="button"
-            class="btn btn-outline-secondary btn-sm"
-            (click)="navegarParaCadastro()"
-            [disabled]="carregandoTodos">
-            <i class="bi bi-plus-square-fill me-1"></i>
-            Novo
-          </button>
-
-          <button
-            type="button"
-            class="btn btn-outline-secondary btn-sm"
-            (click)="limparFiltros()"
-            [disabled]="carregandoLista || carregandoTodos || (!temFiltrosPreenchidos() && !filtrosAplicados)">
-            <i class="bi bi-eraser-fill me-1"></i>
-            Limpar
-          </button>
-
-          <button
-            type="button"
-            class="btn btn-outline-secondary btn-sm"
-            (click)="navegarParaInicio()">
-            <i class="bi bi-x-circle-fill me-1"></i>
-            Fechar
-          </button>
-        </div>
-
-      </div>
-
-    </div>
+    <app-barra-acoes
+      titulo="Listagem de Usuários"
+      [desabilitarFiltrar]="carregandoLista || carregandoTodos"
+      [carregandoFiltrar]="carregandoLista"
+      [desabilitarLimpar]="carregandoLista || carregandoTodos || (!temFiltrosPreenchidos() && !filtrosAplicados)"
+      (filtrar)="aplicarFiltros()"
+      (novo)="navegarParaCadastro()"
+      (limpar)="limparFiltros()"
+      (fechar)="navegarParaInicio()">
+    </app-barra-acoes>
 
     <div class="card-body">
       <!-- Loading ao carregar todos os usuários -->

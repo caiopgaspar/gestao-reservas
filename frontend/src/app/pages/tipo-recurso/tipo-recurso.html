@@ -3,58 +3,15 @@
   <!-- CARD DE FILTROS -->
   <div class="card mb-4 border-0">
 
-    <div class="card-header bg-transparent border-0">
-
-      <div class="d-flex justify-content-between align-items-center">
-
-        <h5 class="card-title mb-0">
-          Listagem de Tipos de Recurso
-        </h5>
-
-
-        <div class="d-flex gap-2">
-          <button
-            type="button"
-            class="btn btn-outline-secondary btn-sm"
-            (click)="aplicarFiltros()">
-                <span *ngIf="!carregandoLista">
-                  <i class="bi bi-search me-1"></i>
-                  Filtrar
-                </span>
-            <span *ngIf="carregandoLista">
-                  <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                  Buscando...
-                </span>
-          </button>
-
-          <button
-            type="button"
-            class="btn btn-outline-secondary btn-sm"
-            (click)="navegarParaCadastro()">
-            <i class="bi bi-plus-square-fill me-1"></i>
-            Novo
-          </button>
-
-          <button
-            type="button"
-            class="btn btn-outline-secondary btn-sm"
-            (click)="limparFiltros()">
-            <i class="bi bi-eraser-fill me-1"></i>
-            Limpar
-          </button>
-
-          <button
-            type="button"
-            class="btn btn-outline-secondary btn-sm"
-            (click)="navegarParaInicio()">
-            <i class="bi bi-x-circle-fill me-1"></i>
-            Fechar
-          </button>
-        </div>
-
-      </div>
-
-    </div>
+    <app-barra-acoes
+      titulo="Listagem de Tipos de Recurso"
+      [desabilitarFiltrar]="carregandoLista"
+      [carregandoFiltrar]="carregandoLista"
+      (filtrar)="aplicarFiltros()"
+      (novo)="navegarParaCadastro()"
+      (limpar)="limparFiltros()"
+      (fechar)="navegarParaInicio()">
+    </app-barra-acoes>
 
     <div class="card-body">
       <form [formGroup]="filtroForm">

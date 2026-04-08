@@ -7,11 +7,12 @@ import { ReservaService, ReservaResponseDto, FiltroReserva, StatusReservaEnum } 
 import { RecursoService, RecursoResponseDto } from '../../services/recurso';
 import { UsuarioService, UsuarioResponseDto } from '../../services/usuario';
 import { AuthService } from '../../services/auth';
+import { BarraAcoes } from '../barra-acoes/barra-acoes';
 
 @Component({
   selector: 'app-reserva',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, BarraAcoes],
   templateUrl: './reserva.html',
   styleUrls: ['./reserva.css']
 })
