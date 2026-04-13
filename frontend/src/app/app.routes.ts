@@ -10,6 +10,7 @@ import { ReservaCadastro } from './pages/reserva-cadastro/reserva-cadastro';
 import { Index } from './pages/index/index';
 import { Login } from './pages/login/login';
 import { AuthGuard } from './guards/auth.guard';
+import { Relatorio } from './pages/relatorio/relatorio';
 
 
 export const routes: Routes = [
@@ -33,6 +34,8 @@ export const routes: Routes = [
   { path: 'reserva/cadastro/:id', component: ReservaCadastro },
 
   { path: 'login', component: Login },
+
+  { path: 'relatorios', component: Relatorio },
 
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', redirectTo: '/login' }

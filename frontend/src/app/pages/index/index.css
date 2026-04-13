@@ -1,0 +1,160 @@
+.calendario-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.dia {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 4px;
+  position: relative;
+  font-size: 0.875rem;
+  min-height: 30px;
+  padding: 4px;
+  transition: all 0.2s ease;
+}
+
+.dia.outro-mes {
+  background: #f0f0f0;
+  color: #adb5bd;
+}
+
+.dia.tem-reserva {
+  background: #e3f2fd;
+  cursor: pointer;
+}
+
+.dia.tem-reserva:hover {
+  background: #bbdefb;
+}
+
+.dia.clickable {
+  cursor: pointer;
+}
+
+.dia.clickable:hover {
+  background: #bbdefb;
+}
+
+.dia-selecionado {
+  background: #1976d2 !important;
+  color: white !important;
+}
+
+.dia-selecionado .indicador-reserva {
+  background: white !important;
+  color: #1976d2 !important;
+}
+
+.dia-numero {
+  font-weight: 500;
+}
+
+.indicador-reserva {
+  background: #1976d2;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+  margin-top: 2px;
+}
+
+.grafico-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.grafico-barras {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.barras-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.barras-label {
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.barras-valor {
+  font-weight: bold;
+  color: #1976d2;
+}
+
+.barras-track {
+  height: 24px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.barras-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #1976d2, #42a5f5);
+  border-radius: 4px;
+  transition: height 0.3s ease;
+  min-width: 4px;
+}
+
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.display-6 {
+  font-size: 2rem;
+}
+
+.modal.show {
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+}
+
+.bg-success {
+  background-color: #28a745 !important;
+}
+
+.bg-warning {
+  background-color: #ffc107 !important;
+}
+
+.bg-danger {
+  background-color: #dc3545 !important;
+}
+
+.bg-info {
+  background-color: #17a2b8 !important;
+}
+
+.bg-secondary {
+  background-color: #6c757d !important;
+}

@@ -74,6 +74,13 @@
                 <span *ngIf="sidebarExpanded" class="ms-4">Usuário</span>
               </a>
             </li>
+            <li class="nav-item">
+              <a routerLink="/relatorios" routerLinkActive="menu-selecionado"
+                 class="nav-link text-dark d-flex align-items-center">
+                <i class="bi bi-file-text fs-5"></i>
+                <span *ngIf="sidebarExpanded" class="ms-4">Relatórios</span>
+              </a>
+            </li>
           </ul>
 
           <!-- Footer da Sidebar -->
@@ -94,7 +101,9 @@
           <button class="btn btn-sm btn-light me-2 d-md-none" (click)="toggleSidebar()">
             <i class="bi bi-list"></i>
           </button>
-          <h4 class="mb-0">{{ title }}</h4>
+          <img src="assets/images/logo-completa.png"
+              alt="Logo" class="me-2" style="height: 40px;">
+          <!-- <h4 class="mb-0">{{ title }}</h4> -->
           </div>
           <div class="dropdown bd-highlight">
             <button class="btn btn-transparent text-white border-0 d-flex align-items-center p-0"
