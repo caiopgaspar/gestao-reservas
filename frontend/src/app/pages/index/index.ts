@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReservaService, ReservaResponseDto, StatusReservaEnum } from '../../services/reserva';
@@ -53,7 +53,8 @@ export class Index implements OnInit {
     private reservaService: ReservaService,
     private recursoService: RecursoService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -78,9 +79,9 @@ export class Index implements OnInit {
     this.carregando = true;
     this.erroCarregamento = false;
     this.mensagemErro = 'Dados não carregados';
+    this.cdr.detectChanges();
 
-    setTimeout(() => {
-      const reservas$ = this.reservaService.buscarTodas().pipe(
+    const reservas$ = this.reservaService.buscarTodas().pipe(
         timeout(1000),
         catchError(erro => {
           console.error('Erro ao carregar reservas:', erro);
@@ -101,7 +102,8 @@ export class Index implements OnInit {
         recursos: recursos$
       }).pipe(
         finalize(() => {
-          this.carregando = false;
+          console.log('Finalize: carregando = false');
+          this.cdr.detectChanges();
         })
       ).subscribe({
       next: (result) => {
@@ -113,7 +115,6 @@ export class Index implements OnInit {
         this.reservas = result.reservas;
         this.recursos = result.recursos;
 
-        // Verificar se houve erro em algum dos serviços
         if (result.reservas.length === 0 && result.recursos.length === 0) {
           this.erroCarregamento = true;
           this.mensagemErro = 'Não foi possível carregar os dados. Verifique sua conexão.';
@@ -128,6 +129,7 @@ export class Index implements OnInit {
         // Gerar calendário e gráfico
         this.gerarCalendario();
         this.gerarDadosGrafico();
+        this.cdr.detectChanges();
         console.log('Dados processados com sucesso');
       },
       error: (erro) => {
@@ -141,9 +143,11 @@ export class Index implements OnInit {
         this.recursos = [];
         this.gerarCalendario();
         this.gerarDadosGrafico();
+        this.cdr.detectChanges();
       }
     });
-    });
+
+    this.carregando = false;
   }
 
   gerarCalendario(): void {
