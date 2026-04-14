@@ -2,6 +2,7 @@ package com.reservas.service;
 
 import com.reservas.dto.request.ReservaRequestDto;
 import com.reservas.model.Reserva;
+import com.reservas.model.enums.StatusReservaEnum;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,5 +24,7 @@ public interface IReservaService {
     Reserva salvar (ReservaRequestDto dto);
 
     void deletar (Long id);
+
+    void atualizarStatus(Long id, StatusReservaEnum status);
 
 }

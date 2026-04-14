@@ -3,6 +3,7 @@ package com.reservas.controller;
 import com.reservas.dto.request.ReservaRequestDto;
 import com.reservas.dto.response.ReservaResponseDto;
 import com.reservas.model.Reserva;
+import com.reservas.model.enums.StatusReservaEnum;
 import com.reservas.repository.ReservaRepository;
 import com.reservas.service.ReservaService;
 import jakarta.validation.Valid;
@@ -59,6 +60,14 @@ public class ReservaController {
         dto.setId(id);
         Reserva reservaAtualizada = reservaService.salvar(dto);
         ReservaResponseDto responseDto = new ReservaResponseDto((reservaAtualizada));
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @PutMapping("/{id}/cancelar")
+    public ResponseEntity<ReservaResponseDto> cancelar(@PathVariable Long id){
+        reservaService.atualizarStatus(id, StatusReservaEnum.CANCELADA);
+        Reserva reserva = reservaService.buscarPorId(id);
+        ReservaResponseDto responseDto = new ReservaResponseDto(reserva);
         return ResponseEntity.ok(responseDto);
     }
 

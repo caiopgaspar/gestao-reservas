@@ -147,6 +147,7 @@
             <td class="text-center" style="width: 10%">
               <div class="btn-group btn-group-sm border-0" role="group">
                 <button
+                  *ngIf="reserva.status !== statusReserva.CANCELADA"
                   type="button"
                   class="btn btn-outlined-light"
                   (click)="navegarParaEdicao(reserva.id)"
@@ -154,7 +155,7 @@
                   <i class="bi bi-pencil"></i>
                 </button>
                 <button
-                  *ngIf="reserva.status === statusReserva.PENDENTE || reserva.status === statusReserva.CONFIRMADA"
+                  *ngIf="reserva.status !== statusReserva.CANCELADA"
                   type="button"
                   class="btn btn-outlined-light"
                   (click)="cancelarReserva(reserva.id)"
@@ -162,6 +163,7 @@
                   <i class="bi bi-x-circle"></i>
                 </button>
                 <button
+                  *ngIf="isAdmin"
                   type="button"
                   class="btn btn-outlined-light"
                   (click)="deletarReserva(reserva.id)"

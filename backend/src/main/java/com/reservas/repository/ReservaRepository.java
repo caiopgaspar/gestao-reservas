@@ -14,7 +14,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
 
     @Query("SELECT r FROM Reserva r " +
             "WHERE r.recurso.id = :recursoId " +
-            "AND r.status IN ('CONFIRMADA', 'PENDENTE') " +
+            "AND r.status IN ('AGENDADA', 'REALIZADA') " +
             "AND (:inicio < r.dataHoraFim AND :fim > r.dataHoraInicio)" +
             "AND (:idReservaAtual IS NULL OR r.id != :idReservaAtual)"
     )

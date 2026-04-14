@@ -46,8 +46,8 @@ export class Index implements OnInit {
 
   totalReservas = 0;
   totalRecursos = 0;
-  reservasPendentes = 0;
-  reservasConfirmadas = 0;
+  reservasAgendadas = 0;
+  reservasRealizadas = 0;
 
   constructor(
     private reservaService: ReservaService,
@@ -122,8 +122,8 @@ export class Index implements OnInit {
         // Calcular estatísticas
         this.totalReservas = this.reservas.length;
         this.totalRecursos = this.recursos.length;
-        this.reservasPendentes = this.reservas.filter(r => r.status === StatusReservaEnum.PENDENTE).length;
-        this.reservasConfirmadas = this.reservas.filter(r => r.status === StatusReservaEnum.CONFIRMADA).length;
+        this.reservasAgendadas = this.reservas.filter(r => r.status === StatusReservaEnum.AGENDADA).length;
+        this.reservasRealizadas = this.reservas.filter(r => r.status === StatusReservaEnum.REALIZADA).length;
 
         // Gerar calendário e gráfico
         this.gerarCalendario();
@@ -186,6 +186,7 @@ export class Index implements OnInit {
 
     const reservasDoDia = this.reservas.filter(reserva => {
       if (!reserva.dataHoraInicio) return false;
+      if (reserva.status === StatusReservaEnum.CANCELADA) return false;
       const inicioReserva = reserva.dataHoraInicio.split('T')[0];
       return inicioReserva === dataStr;
     });
@@ -216,8 +217,9 @@ export class Index implements OnInit {
 
     const mapa = new Map<string, number>();
 
-    // Agrupar por código do recurso
-    this.reservas.forEach(reserva => {
+    const reservasAtivas = this.reservas.filter(r => r.status !== StatusReservaEnum.CANCELADA);
+
+    reservasAtivas.forEach(reserva => {
       const recurso = this.recursos.find(r => r.id === reserva.recursoId);
       const label = recurso
         ? `${recurso.codigoIdentificacao} - ${recurso.nome}`
@@ -227,7 +229,6 @@ export class Index implements OnInit {
       mapa.set(label, atual + 1);
     });
 
-    // Converter para array e ordenar
     this.dadosGrafico = Array.from(mapa.entries())
       .map(([recurso, quantidade]) => ({ recurso, quantidade }))
       .sort((a, b) => b.quantidade - a.quantidade)
@@ -267,14 +268,12 @@ export class Index implements OnInit {
 
   getStatusClass(status: string): string {
     switch (status) {
-      case StatusReservaEnum.CONFIRMADA:
-        return 'bg-success';
-      case StatusReservaEnum.PENDENTE:
+      case StatusReservaEnum.AGENDADA:
         return 'bg-warning text-dark';
+      case StatusReservaEnum.REALIZADA:
+        return 'bg-success';
       case StatusReservaEnum.CANCELADA:
         return 'bg-danger';
-      case StatusReservaEnum.CONCLUIDA:
-        return 'bg-info';
       default:
         return 'bg-secondary';
     }

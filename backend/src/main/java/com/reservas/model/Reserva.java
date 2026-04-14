@@ -49,6 +49,6 @@ public class Reserva {
         this.dataHoraInicio = dataHoraInicio;
         this.dataHoraFim = dataHoraFim;
         this.finalidade = finalidade;
-        this.status = StatusReservaEnum.PENDENTE; //Status inicial
+        this.status = StatusReservaEnum.AGENDADA;
     }
 }

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ReservaService, ReservaResponseDto, ReservaRequestDto } from '../../services/reserva';
+import { ReservaService, ReservaResponseDto, ReservaRequestDto, StatusReservaEnum } from '../../services/reserva';
 import { RecursoService, RecursoResponseDto } from '../../services/recurso';
 import { UsuarioService, UsuarioResponseDto } from '../../services/usuario';
 import { AuthService } from '../../services/auth';

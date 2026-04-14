@@ -4,10 +4,9 @@ import { Observable } from 'rxjs';
 import { AppConfig } from '../core/config';
 
 export enum StatusReservaEnum {
-  PENDENTE = 'PENDENTE',
-  CONFIRMADA = 'CONFIRMADA',
-  CANCELADA = 'CANCELADA',
-  CONCLUIDA = 'CONCLUIDA'
+  AGENDADA = 'AGENDADA',
+  REALIZADA = 'REALIZADA',
+  CANCELADA = 'CANCELADA'
 }
 
 export interface ReservaRequestDto {
@@ -114,10 +113,17 @@ export class ReservaService {
     return this.buscar({ usuarioId });
   }
 
-  /**
-   * Busca reservas por recurso
-   */
+/**
+    * Busca reservas por recurso
+    */
   public buscarPorRecurso(recursoId: number): Observable<ReservaResponseDto[]> {
     return this.buscar({ recursoId });
+  }
+
+  /**
+   * Cancela uma reserva (altera status para CANCELADA)
+   */
+  public cancelar(id: number): Observable<ReservaResponseDto> {
+    return this.http.put<ReservaResponseDto>(`${this.apiUrl}/${id}/cancelar`, {});
   }
 }

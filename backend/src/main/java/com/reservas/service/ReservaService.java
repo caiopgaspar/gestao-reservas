@@ -34,12 +34,16 @@ public class ReservaService implements IReservaService{
 
     @Override
     public List<Reserva> buscarTodas() {
-        return reservaRepository.findAll();
+        List<Reserva> reservas = reservaRepository.findAll();
+        reservas.forEach(this::atualizarStatusAutomatico);
+        return reservas;
     }
 
     @Override
     public List<Reserva> buscarComFiltros(Long usuarioId, Long recursoId) {
-        return reservaRepository.buscarPorFiltros(usuarioId, recursoId);
+        List<Reserva> reservas = reservaRepository.buscarPorFiltros(usuarioId, recursoId);
+        reservas.forEach(this::atualizarStatusAutomatico);
+        return reservas;
     }
 
     @Override
@@ -86,6 +90,10 @@ public class ReservaService implements IReservaService{
         }
 
         Reserva reserva = dto.getId() != null ? buscarPorId(dto.getId()) : new Reserva();
+        
+        if (reserva.getStatus() == StatusReservaEnum.CANCELADA) {
+            throw new IllegalStateException("Não é possível editar uma reserva cancelada.");
+        }
 
         reserva.setUsuario(usuario);
         reserva.setRecurso(recurso);
@@ -94,10 +102,34 @@ public class ReservaService implements IReservaService{
         reserva.setFinalidade(dto.getFinalidade());
 
         if (reserva.getId() == null) {
-            reserva.setStatus(StatusReservaEnum.CONFIRMADA);
+            reserva.setStatus(StatusReservaEnum.AGENDADA);
+        } else {
+            atualizarStatusAutomatico(reserva);
         }
 
         return reservaRepository.save(reserva);
+    }
+
+    @Override
+    @Transactional
+    public void atualizarStatus(Long id, StatusReservaEnum novoStatus) {
+        Reserva reserva = buscarPorId(id);
+        
+        if (reserva.getStatus() == StatusReservaEnum.CANCELADA) {
+            throw new IllegalStateException("Não é possível alterar o status de uma reserva cancelada.");
+        }
+        
+        reserva.setStatus(novoStatus);
+        reservaRepository.save(reserva);
+    }
+
+    private void atualizarStatusAutomatico(Reserva reserva) {
+        LocalDateTime agora = LocalDateTime.now();
+        
+        if (reserva.getDataHoraFim().isBefore(agora) && reserva.getStatus() == StatusReservaEnum.AGENDADA) {
+            reserva.setStatus(StatusReservaEnum.REALIZADA);
+            reservaRepository.save(reserva);
+        }
     }
 
     @Override

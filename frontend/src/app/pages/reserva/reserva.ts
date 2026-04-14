@@ -178,7 +178,7 @@ export class Reserva implements OnInit {
 
   cancelarReserva(id: number): void {
     if (confirm('Tem certeza que deseja cancelar esta reserva?')) {
-      this.reservaService.deletar(id).subscribe({
+      this.reservaService.cancelar(id).subscribe({
         next: () => {
           alert('Reserva cancelada com sucesso!');
           this.carregarReservas();
@@ -208,14 +208,12 @@ export class Reserva implements OnInit {
 
   getBadgeClass(status: StatusReservaEnum): string {
     switch (status) {
-      case StatusReservaEnum.CONFIRMADA:
-        return 'bg-success';
-      case StatusReservaEnum.PENDENTE:
+      case StatusReservaEnum.AGENDADA:
         return 'bg-warning';
+      case StatusReservaEnum.REALIZADA:
+        return 'bg-success';
       case StatusReservaEnum.CANCELADA:
         return 'bg-danger';
-      case StatusReservaEnum.CONCLUIDA:
-        return 'bg-info';
       default:
         return 'bg-secondary';
     }
