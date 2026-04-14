@@ -3,19 +3,19 @@
     <!-- Card de Relatório de Recursos -->
     <div class="col-md-6 mb-4">
       <div class="card h-100 shadow-sm">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header" style="background-color: #f4f4f4">
           <h5 class="mb-0">
             <i class="bi bi-building me-2"></i>
             Relatório de Recursos
           </h5>
         </div>
-        <div class="card-body">
+        <div class="card-body text-center">
           <p class="card-text text-muted">
             Gera uma lista completa de todos os recursos cadastrados no sistema,
             incluindo código, nome, tipo, localização e capacidade.
           </p>
           <button
-            class="btn btn-primary w-100"
+            class="btn btn-danger w-20"
             (click)="gerarRelatorioRecursos()"
             [disabled]="carregando">
             <span *ngIf="carregando" class="spinner-border spinner-border-sm me-2"></span>
@@ -26,7 +26,8 @@
       </div>
     </div>
 
-    <!-- Card de Relatório de Reservas -->
+
+    <!-- Card de Relatório de Reservas
     <div class="col-md-6 mb-4">
       <div class="card h-100 shadow-sm">
         <div class="card-header bg-success text-white">
@@ -40,7 +41,7 @@
             Gera um relatório de reservas com filtros personalizados.
           </p>
 
-          <!-- Filtros -->
+           Filtros
           <div class="mb-3">
             <label for="recursoId" class="form-label">Recurso</label>
             <select id="recursoId" class="form-select" [(ngModel)]="filtros.recursoId">
@@ -81,5 +82,6 @@
         </div>
       </div>
     </div>
+    -->
   </div>
 </div>

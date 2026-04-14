@@ -21,6 +21,7 @@
 
   <!-- Conteúdo principal -->
   <div *ngIf="!carregando && !erroCarregamento">
+
     <!-- Cards de Estatísticas -->
     <div class="row mb-4">
       <div class="col-md-3">
@@ -144,7 +145,7 @@
             <div *ngIf="dadosGrafico.length > 0" class="grafico-container">
               <div *ngFor="let dado of dadosGrafico" class="grafico-barras">
                 <div class="barras-info">
-                  <span class="barras-label">{{ dado.recurso }}</span>
+                  <span class="barras-label">{{ dado.recurso }} </span>
                   <span class="barras-valor">{{ dado.quantidade }}</span>
                 </div>
                 <div class="barras-track">
@@ -156,6 +157,7 @@
         </div>
       </div>
     </div>
+
   </div>
 </div>
 

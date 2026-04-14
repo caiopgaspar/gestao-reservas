@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RelatorioService, FiltroRelatorio } from '../../services/relatorio';
 import { RecursoService, RecursoResponseDto } from '../../services/recurso';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-relatorio',
@@ -44,31 +45,36 @@ export class Relatorio implements OnInit {
   gerarRelatorioRecursos(): void {
     this.carregando = true;
 
-    this.relatorioService.gerarRelatorioRecursos().subscribe({
+    this.relatorioService.gerarRelatorioRecursos().pipe(
+      finalize(() => this.carregando = false)
+    ).subscribe({
       next: (blob: Blob) => {
         this.downloadPdf(blob, 'relatorio_recursos');
-        this.carregando = false;
       },
       error: (erro: Error) => {
         console.error('Erro ao gerar relatório:', erro);
         alert('Erro ao gerar relatório de recursos. Tente novamente.');
-        this.carregando = false;
       }
     });
+
+    setTimeout(() => {
+      this.carregando = false;
+    }, 2000);
+
   }
 
   gerarRelatorioReservas(): void {
     this.carregando = true;
 
-    this.relatorioService.gerarRelatorioReservas(this.filtros).subscribe({
+    this.relatorioService.gerarRelatorioReservas(this.filtros).pipe(
+      finalize(() => this.carregando = false)
+    ).subscribe({
       next: (blob: Blob) => {
         this.downloadPdf(blob, 'relatorio_reservas');
-        this.carregando = false;
       },
       error: (erro: Error) => {
         console.error('Erro ao gerar relatório:', erro);
         alert('Erro ao gerar relatório de reservas. Tente novamente.');
-        this.carregando = false;
       }
     });
   }

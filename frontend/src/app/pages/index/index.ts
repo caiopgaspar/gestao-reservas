@@ -77,33 +77,33 @@ export class Index implements OnInit {
   carregarDados(): void {
     this.carregando = true;
     this.erroCarregamento = false;
-    this.mensagemErro = '';
+    this.mensagemErro = 'Dados não carregados';
 
-    // Carregar dados com timeout e tratamento de erro
-    const reservas$ = this.reservaService.buscarTodas().pipe(
-      timeout(30000), // 30 segundos de timeout
-      catchError(erro => {
-        console.error('Erro ao carregar reservas:', erro);
-        return of([]); // Retorna array vazio em caso de erro
-      })
-    );
+    setTimeout(() => {
+      const reservas$ = this.reservaService.buscarTodas().pipe(
+        timeout(1000),
+        catchError(erro => {
+          console.error('Erro ao carregar reservas:', erro);
+          return of([]);
+        })
+      );
 
-    const recursos$ = this.recursoService.buscarTodos().pipe(
-      timeout(30000), // 30 segundos de timeout
-      catchError(erro => {
-        console.error('Erro ao carregar recursos:', erro);
-        return of([]); // Retorna array vazio em caso de erro
-      })
-    );
+      const recursos$ = this.recursoService.buscarTodos().pipe(
+        timeout(1000),
+        catchError(erro => {
+          console.error('Erro ao carregar recursos:', erro);
+          return of([]);
+        })
+      );
 
-    forkJoin({
-      reservas: reservas$,
-      recursos: recursos$
-    }).pipe(
-      finalize(() => {
-        this.carregando = false;
-      })
-    ).subscribe({
+      forkJoin({
+        reservas: reservas$,
+        recursos: recursos$
+      }).pipe(
+        finalize(() => {
+          this.carregando = false;
+        })
+      ).subscribe({
       next: (result) => {
         console.log('Dados carregados:', {
           reservas: result.reservas.length,
@@ -128,6 +128,7 @@ export class Index implements OnInit {
         // Gerar calendário e gráfico
         this.gerarCalendario();
         this.gerarDadosGrafico();
+        console.log('Dados processados com sucesso');
       },
       error: (erro) => {
         console.error('Erro fatal ao carregar dados:', erro);
@@ -141,6 +142,7 @@ export class Index implements OnInit {
         this.gerarCalendario();
         this.gerarDadosGrafico();
       }
+    });
     });
   }
 
@@ -217,9 +219,12 @@ export class Index implements OnInit {
     // Agrupar por código do recurso
     this.reservas.forEach(reserva => {
       const recurso = this.recursos.find(r => r.id === reserva.recursoId);
-      const codigo = recurso ? recurso.codigoIdentificacao : `Recurso ${reserva.recursoId}`;
-      const atual = mapa.get(codigo) || 0;
-      mapa.set(codigo, atual + 1);
+      const label = recurso
+        ? `${recurso.codigoIdentificacao} - ${recurso.nome}`
+        : `Recurso ${reserva.recursoId}`;
+
+      const atual = mapa.get(label) || 0;
+      mapa.set(label, atual + 1);
     });
 
     // Converter para array e ordenar
@@ -287,6 +292,6 @@ export class Index implements OnInit {
   }
 
   recarregar(): void {
-    this.carregarDados();
+    this.carregarDados()
   }
 }
