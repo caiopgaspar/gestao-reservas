@@ -18,6 +18,8 @@ import { BarraAcoes } from '../barra-acoes/barra-acoes';
 })
 export class Reserva implements OnInit {
 
+  statusReservaEnum = StatusReservaEnum;
+
   reservas: ReservaResponseDto[] = [];
   recursos: RecursoResponseDto[] = [];
   usuarios: UsuarioResponseDto[] = [];
@@ -31,10 +33,11 @@ export class Reserva implements OnInit {
   filtrosAplicados = false;
   mostrarInstrucoes = true;
 
-  usuarioLogado: UsuarioResponseDto | null = null;
+usuarioLogado: UsuarioResponseDto | null = null;
   isAdmin = false;
 
-  statusReserva = StatusReservaEnum;
+  // Ordenação
+  ordenacao: { coluna: string; direcao: 'asc' | 'desc' } = { coluna: '', direcao: 'asc' };
 
   constructor(
     private reservaService: ReservaService,
@@ -132,6 +135,9 @@ export class Reserva implements OnInit {
       this.reservaService.buscar(filtros).subscribe({
         next: (reservas) => {
           this.reservas = reservas;
+          if (this.ordenacao.coluna) {
+            this.reservas = this.ordenarLista(this.reservas, this.ordenacao.coluna, this.ordenacao.direcao);
+          }
           this.carregandoLista = false;
           this.habilitarCamposFiltro();
         },
@@ -266,5 +272,70 @@ export class Reserva implements OnInit {
     if (usuarioControl && usuarioControl.enabled === false) {
       usuarioControl.enable();
     }
+  }
+
+  ordenar(coluna: string): void {
+    if (this.ordenacao.coluna === coluna) {
+      this.ordenacao.direcao = this.ordenacao.direcao === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.ordenacao.coluna = coluna;
+      this.ordenacao.direcao = 'asc';
+    }
+
+    this.reservas = [...this.ordenarLista(this.reservas, coluna, this.ordenacao.direcao)];
+  }
+
+  private ordenarLista(lista: ReservaResponseDto[], coluna: string, direcao: 'asc' | 'desc'): ReservaResponseDto[] {
+    return [...lista].sort((a, b) => {
+      let aVal: any;
+      let bVal: any;
+
+      switch (coluna) {
+        case 'recurso':
+          aVal = a.nomeRecurso || '';
+          bVal = b.nomeRecurso || '';
+          break;
+        case 'usuario':
+          aVal = a.nomeCompleto || '';
+          bVal = b.nomeCompleto || '';
+          break;
+        case 'inicio':
+          aVal = new Date(a.dataHoraInicio).getTime();
+          bVal = new Date(b.dataHoraInicio).getTime();
+          break;
+        case 'fim':
+          aVal = new Date(a.dataHoraFim).getTime();
+          bVal = b.dataHoraFim ? new Date(b.dataHoraFim).getTime() : 0;
+          break;
+        case 'status':
+          aVal = a.status || '';
+          bVal = b.status || '';
+          break;
+        default:
+          aVal = '';
+          bVal = '';
+      }
+
+      if (aVal === null || aVal === undefined || aVal === '') return 1;
+      if (bVal === null || bVal === undefined || bVal === '') return -1;
+
+      let comparacao = 0;
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        comparacao = aVal.toLowerCase().localeCompare(bVal.toLowerCase());
+      } else if (typeof aVal === 'number' && typeof bVal === 'number') {
+        comparacao = aVal - bVal;
+      } else {
+        comparacao = String(aVal).localeCompare(String(bVal));
+      }
+
+      return direcao === 'asc' ? comparacao : -comparacao;
+    });
+  }
+
+  getIconeOrdenacao(coluna: string): string {
+    if (this.ordenacao.coluna !== coluna) {
+      return '';
+    }
+    return this.ordenacao.direcao === 'asc' ? '↑' : '↓';
   }
 }

@@ -26,6 +26,9 @@ export class TipoRecurso implements OnInit {
   public filtrosAplicados = false;
   public mostrarInstrucoes = true;
 
+  // Ordenação
+  ordenacao: { coluna: string; direcao: 'asc' | 'desc' } = { coluna: '', direcao: 'asc' };
+
   constructor(
     private tipoRecursoService: TipoRecursoService,
     private router: Router,
@@ -74,6 +77,10 @@ export class TipoRecurso implements OnInit {
             );
           } else {
             this.tiposRecurso = tipos;
+          }
+
+          if (this.ordenacao.coluna) {
+            this.tiposRecurso = this.ordenarLista(this.tiposRecurso, this.ordenacao.coluna, this.ordenacao.direcao);
           }
 
           this.carregandoLista = false;
@@ -198,6 +205,53 @@ export class TipoRecurso implements OnInit {
         control.enable();
       }
     });
+  }
+
+  ordenar(coluna: string): void {
+    if (this.ordenacao.coluna === coluna) {
+      this.ordenacao.direcao = this.ordenacao.direcao === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.ordenacao.coluna = coluna;
+      this.ordenacao.direcao = 'asc';
+    }
+
+    this.tiposRecurso = [...this.ordenarLista(this.tiposRecurso, coluna, this.ordenacao.direcao)];
+  }
+
+  private ordenarLista(lista: TipoRecursoInterface[], coluna: string, direcao: 'asc' | 'desc'): TipoRecursoInterface[] {
+    return [...lista].sort((a, b) => {
+      const aVal = this.getValorCampo(a, coluna);
+      const bVal = this.getValorCampo(b, coluna);
+
+      if (aVal === null || aVal === undefined || aVal === '') return 1;
+      if (bVal === null || bVal === undefined || bVal === '') return -1;
+
+      let comparacao = 0;
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        comparacao = aVal.toLowerCase().localeCompare(bVal.toLowerCase());
+      } else if (typeof aVal === 'number' && typeof bVal === 'number') {
+        comparacao = aVal - bVal;
+      } else {
+        comparacao = String(aVal).localeCompare(String(bVal));
+      }
+
+      return direcao === 'asc' ? comparacao : -comparacao;
+    });
+  }
+
+  private getValorCampo(tipo: TipoRecursoInterface, coluna: string): any {
+    switch (coluna) {
+      case 'nome': return tipo.nome;
+      case 'descricao': return tipo.descricao;
+      default: return '';
+    }
+  }
+
+  getIconeOrdenacao(coluna: string): string {
+    if (this.ordenacao.coluna !== coluna) {
+      return '';
+    }
+    return this.ordenacao.direcao === 'asc' ? '↑' : '↓';
   }
 
 }

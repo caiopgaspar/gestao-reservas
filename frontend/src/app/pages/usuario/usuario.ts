@@ -28,6 +28,9 @@ export class Usuario implements OnInit {
   usuarioAutenticado: UsuarioResponseDto | null = null;
   isAdmin = false;
 
+  // Ordenação
+  ordenacao: { coluna: string; direcao: 'asc' | 'desc' } = { coluna: '', direcao: 'asc' };
+
   constructor(
     private usuarioService: UsuarioService,
     private authService: AuthService,
@@ -111,7 +114,11 @@ export class Usuario implements OnInit {
         this.usuarioService.buscar(filtrosBackend).subscribe({
           next: (usuarios) => {
             // Aplica filtros adicionais no frontend
-            this.usuarios = this.aplicarFiltrosFrontend(usuarios, filtros);
+            let usuariosFiltrados = this.aplicarFiltrosFrontend(usuarios, filtros);
+            if (this.ordenacao.coluna) {
+              usuariosFiltrados = this.ordenarLista(usuariosFiltrados, this.ordenacao.coluna, this.ordenacao.direcao);
+            }
+            this.usuarios = usuariosFiltrados;
             this.carregandoLista = false;
             this.habilitarCamposFiltro();
           },
@@ -124,7 +131,11 @@ export class Usuario implements OnInit {
         });
       } else {
         // Se não tem filtro no backend, usa todos os usuários carregados
-        this.usuarios = this.aplicarFiltrosFrontend(this.todosUsuarios, filtros);
+        let usuariosFiltrados = this.aplicarFiltrosFrontend(this.todosUsuarios, filtros);
+        if (this.ordenacao.coluna) {
+          usuariosFiltrados = this.ordenarLista(usuariosFiltrados, this.ordenacao.coluna, this.ordenacao.direcao);
+        }
+        this.usuarios = usuariosFiltrados;
         this.carregandoLista = false;
         this.habilitarCamposFiltro();
       }
@@ -226,5 +237,55 @@ export class Usuario implements OnInit {
         control.enable();
       }
     });
+  }
+
+  ordenar(coluna: string): void {
+    if (this.ordenacao.coluna === coluna) {
+      this.ordenacao.direcao = this.ordenacao.direcao === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.ordenacao.coluna = coluna;
+      this.ordenacao.direcao = 'asc';
+    }
+
+    this.usuarios = [...this.ordenarLista(this.usuarios, coluna, this.ordenacao.direcao)];
+  }
+
+  private ordenarLista(lista: UsuarioResponseDto[], coluna: string, direcao: 'asc' | 'desc'): UsuarioResponseDto[] {
+    return [...lista].sort((a, b) => {
+      const aVal = this.getValorCampo(a, coluna);
+      const bVal = this.getValorCampo(b, coluna);
+
+      if (aVal === null || aVal === undefined) return 1;
+      if (bVal === null || bVal === undefined) return -1;
+
+      let comparacao = 0;
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        comparacao = aVal.toLowerCase().localeCompare(bVal.toLowerCase());
+      } else if (typeof aVal === 'number' && typeof bVal === 'number') {
+        comparacao = aVal - bVal;
+      } else {
+        comparacao = String(aVal).localeCompare(String(bVal));
+      }
+
+      return direcao === 'asc' ? comparacao : -comparacao;
+    });
+  }
+
+  private getValorCampo(usuario: UsuarioResponseDto, coluna: string): any {
+    switch (coluna) {
+      case 'matricula': return usuario.matricula;
+      case 'nomeCompleto': return usuario.nomeCompleto;
+      case 'nomeUsuario': return usuario.nomeUsuario;
+      case 'email': return usuario.email;
+      case 'lotacao': return usuario.lotacao;
+      default: return '';
+    }
+  }
+
+  getIconeOrdenacao(coluna: string): string {
+    if (this.ordenacao.coluna !== coluna) {
+      return '';
+    }
+    return this.ordenacao.direcao === 'asc' ? '↑' : '↓';
   }
 }

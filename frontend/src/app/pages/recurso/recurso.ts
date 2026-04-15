@@ -28,6 +28,9 @@ export class Recurso implements OnInit {
   filtrosAplicados = false;
   mostrarInstrucoes = true;
 
+  // Ordenação
+  ordenacao: { coluna: string; direcao: 'asc' | 'desc' } = { coluna: '', direcao: 'asc' };
+
   constructor(
     private recursoService: RecursoService,
     private tipoRecursoService: TipoRecursoService,
@@ -68,6 +71,9 @@ export class Recurso implements OnInit {
     this.recursoService.buscar(filtrosLimpos).subscribe({
       next: (recursos) => {
         this.recursos = recursos;
+        if (this.ordenacao.coluna) {
+          this.recursos = this.ordenarLista(this.recursos, this.ordenacao.coluna, this.ordenacao.direcao);
+        }
         this.carregandoLista = false;
         console.log(`${recursos.length} recursos encontrados`);
         this.habilitarCamposFiltro();
@@ -197,5 +203,55 @@ export class Recurso implements OnInit {
           control.enable();
         }
       });
+    }
+
+    ordenar(coluna: string): void {
+      if (this.ordenacao.coluna === coluna) {
+        this.ordenacao.direcao = this.ordenacao.direcao === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.ordenacao.coluna = coluna;
+        this.ordenacao.direcao = 'asc';
+      }
+
+      this.recursos = [...this.ordenarLista(this.recursos, coluna, this.ordenacao.direcao)];
+    }
+
+    private ordenarLista(lista: RecursoResponseDto[], coluna: string, direcao: 'asc' | 'desc'): RecursoResponseDto[] {
+      return [...lista].sort((a, b) => {
+        const aVal = this.getValorCampo(a, coluna);
+        const bVal = this.getValorCampo(b, coluna);
+
+        if (aVal === null || aVal === undefined || aVal === '') return 1;
+        if (bVal === null || bVal === undefined || bVal === '') return -1;
+
+        let comparacao = 0;
+        if (typeof aVal === 'string' && typeof bVal === 'string') {
+          comparacao = aVal.toLowerCase().localeCompare(bVal.toLowerCase());
+        } else if (typeof aVal === 'number' && typeof bVal === 'number') {
+          comparacao = aVal - bVal;
+        } else {
+          comparacao = String(aVal).localeCompare(String(bVal));
+        }
+
+        return direcao === 'asc' ? comparacao : -comparacao;
+      });
+    }
+
+    private getValorCampo(recurso: RecursoResponseDto, coluna: string): any {
+      switch (coluna) {
+        case 'codigo': return recurso.codigoIdentificacao;
+        case 'nome': return recurso.nome;
+        case 'tipo': return recurso.nomeTipoRecurso;
+        case 'localizacao': return recurso.localizacao;
+        case 'capacidade': return recurso.capacidade;
+        default: return '';
+      }
+    }
+
+    getIconeOrdenacao(coluna: string): string {
+      if (this.ordenacao.coluna !== coluna) {
+        return '';
+      }
+      return this.ordenacao.direcao === 'asc' ? '↑' : '↓';
     }
 }

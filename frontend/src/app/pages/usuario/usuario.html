@@ -79,11 +79,21 @@
   <table class="table table-hover table-striped mt-o mb-0 p-0">
     <thead class="table-light">
     <tr>
-      <th style="width: 10%;">Matrícula</th>
-      <th style="width: 30%;">Nome Completo</th>
-      <th style="width: 15%;">Usuário</th>
-      <th style="width: 25%;">E-mail</th>
-      <th style="width: 10%;">Lotação</th>
+      <th style="width: 10%; cursor: pointer;" (click)="ordenar('matricula')">
+        Matrícula <span>{{ getIconeOrdenacao('matricula') }}</span>
+      </th>
+      <th style="width: 30%; cursor: pointer;" (click)="ordenar('nomeCompleto')">
+        Nome Completo <span>{{ getIconeOrdenacao('nomeCompleto') }}</span>
+      </th>
+      <th style="width: 15%; cursor: pointer;" (click)="ordenar('nomeUsuario')">
+        Usuário <span>{{ getIconeOrdenacao('nomeUsuario') }}</span>
+      </th>
+      <th style="width: 25%; cursor: pointer;" (click)="ordenar('email')">
+        E-mail <span>{{ getIconeOrdenacao('email') }}</span>
+      </th>
+      <th style="width: 10%; cursor: pointer;" (click)="ordenar('lotacao')">
+        Lotação <span>{{ getIconeOrdenacao('lotacao') }}</span>
+      </th>
       <th style="width: 10%;" class="text-center">Ações</th>
     </tr>
     </thead>
