@@ -59,7 +59,7 @@ export class Usuario implements OnInit {
     }
 
     this.desabilitarCamposFiltro();
-    this.carregarTodosUsuarios(); // Carrega todos os usuários uma vez
+    this.carregarTodosUsuarios();
     this.mostrarInstrucoes = true;
     this.filtrosAplicados = false;
   }
